@@ -3,20 +3,20 @@
     All the neural network will implemented on the top of it.
 """
 import math
-from utility import visualize_graph as vz
-
+from Tensor.utility import visualize_graph as vz
+import numpy as np
 class Tensor():
 
     def __init__(self,value,subset = (),operation = '') -> None:
         self.data = value
-        self.grad = 0
+        self.grad = np.array(0)
         self._backward = lambda : None
         self.children = set(subset)
         self.sign = operation
         self.id = id(self)
 
     def __repr__(self) -> str:
-        return f"Tensor({self.data})"
+        return f"Tensor(data: {self.data},grad:{self.grad})"
 
     def __add__(self,other):
         # there will be four case 2 + 3 , 2 + Tensor , 4 + Tensor , Tensor + Tensor
@@ -242,22 +242,22 @@ class Tensor():
                     build_graph(child)
                 graph_nodes.append(v)
         build_graph(self)
-        self.grad = 1
+        self.grad = np.array(1)
         # print(graph_nodes)
         for v in reversed(graph_nodes):
             v._backward()
 
 
 
-if __name__ == '__main__':
-    a = Tensor(10)
-    b = Tensor(20)
-    c = Tensor(30)
-    d = Tensor(5)
+# if __name__ == '__main__':
+#     a = Tensor(10)
+#     b = Tensor(20)
+#     c = Tensor(30)
+#     d = Tensor(5)
 
-    e = a * b + c
-    f = 2 * e
-    f.backward()
-    # print(c.grad)
+#     e = a * b + c
+#     f = 2 * e
+#     f.backward()
+#     # print(c.grad)
 
-    vz(self=e)
+#     vz(self=e)

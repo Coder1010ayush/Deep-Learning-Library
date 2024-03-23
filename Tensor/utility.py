@@ -27,3 +27,7 @@ def visualize_graph(self, filename='computation_graph'):
         add_node(self)
 
         dot.render(filename, format='png', cleanup=True)
+
+def typeChecker(**args):
+     for params in args:
+          print(params)
