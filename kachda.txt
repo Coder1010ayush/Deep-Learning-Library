@@ -1,0 +1,47 @@
+def row_col_finder(self,size:tuple):
+        if len(size) == 1:
+            row = size[0]
+            col = size[0]
+
+        else:
+            row = size[0]
+            col = size[1]
+
+        return row,col
+
+    def eye(self,size:tuple = (3,),value = 1):
+        row, col = self.row_col_finder(size=size)
+
+        mat =  [ ]
+        for i in range(0,row):
+            ls_row = []
+            for j in range(0,col):
+                ls_row.append(Tensor(value=value))
+            mat.append(ls_row)
+        return np.array(mat)
+    
+
+    def identity(self,size:tuple=(3,3)):
+        return self.eye(size=size,value=1)
+    
+    def normalized_tensor(self,size:tuple = ()):
+        row , col = self.row_col_finder(size= size)
+        mat = [ ]
+        for i in range(0,row):
+            row_mat = []
+            for j in range(0, col):
+                row_mat.append(Tensor(random.normalvariate(mu=0,sigma=1)))
+            mat.append(row_mat)
+        return np.array(object = mat)
+    
+
+    def multiply(self,mat1,mat2):
+        return np.dot(mat1.data,mat2.data)
+    
+
+
+
+            
+        
+
+
