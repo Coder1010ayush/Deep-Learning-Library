@@ -8,10 +8,10 @@ class Tensor:
     def __init__(self,value, subset = (), operation= "") -> None:
         if isinstance(value, (int,float)):
             # this means value is scalar value 
-            self.data = np.array(value,dtype=float)
+            self.data = np.array(value,dtype="float64")
         else:
             # this means value is list 
-            self.data = np.array(object=value,dtype=float)
+            self.data = np.array(object=value,dtype="float64")
         self.sign = operation
         self.grad = 0
         self._backward = lambda : None
@@ -312,5 +312,9 @@ if __name__ == '__main__':
     print("out grad : ",out.grad)
 
     out.visualize_graph()
+
+    arr1 = np.array([1,2,3])
+    arr2 = np.array([2,3,4])
+    print(arr1*arr2)
 
     

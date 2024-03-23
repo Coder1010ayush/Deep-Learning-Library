@@ -16,7 +16,7 @@ class Module:
     def zero_grad(self):
         
         for params in self.parameters():
-            self.grad = 0
+            params.grad = 0
 
     def parameters(self):
         return []
@@ -49,9 +49,9 @@ class NeuralNode(Module):
     def parameters(self):
         return self.weigths + [self.bias]
     
-    def __repr__(self) -> str:
-        # f"( \nNueralNode \nParameters {(self.weigths)},{([self.bias])} \n)"
-        return f"Node({self.number_of_nodes})"
+    def __repr__(self):
+        return f"{'relu' if self.act else 'Linear'}Node({len(self.weigths)})"
+
         
 class Layers(Module):
 
@@ -66,13 +66,10 @@ class Layers(Module):
         
 
     def parameters(self):
-        self.params = []
-        for node in self.nodes:
-            self.params.extend(node.parameters())
-        return self.params
+        return [p for n in self.nodes for p in n.parameters()]
     
-    def __repr__(self) -> str:
-        return f"Layer{self.input_node,self.outout_node}\n"
+    def __repr__(self):
+        return f"Layer of [{', '.join(str(n) for n in self.nodes)}]"
     
     def __call__(self, x) :
         outcome = []
@@ -85,25 +82,19 @@ class Layers(Module):
 class Dense(Module):
 
     def __init__(self,number_of_input, list_of_layers , act = True):
-        self.input_nodes = number_of_input
-        self.list_of_layers = list_of_layers
         self.act = act
-
         self.layers = []
-        for item in self.list_of_layers:
-            self.layers.append(Layers(number_of_input_nodes=self.input_nodes,number_of_output_nodes=item)) # defining all the layer and appending to the self.nodes list 
-        
+        list_of_layers = [number_of_input] + list_of_layers
+        for i in range(len(list_of_layers)-1):
+            self.layers.append(Layers(number_of_input_nodes=list_of_layers[i],number_of_output_nodes=list_of_layers[i+1]))
 
 
-    def __repr__(self) -> str:
-        return f"Dense(\n{self.layers}\n)"
+    def __repr__(self):
+        return f"Dense of [{', '.join(str(layer) for layer in self.layers)}]"
     
 
     def parameters(self):
-        self.params = []
-        for layer in self.layers:
-            self.params.extend(layer.parameters())
-        return self.params
+        return [p for layer in self.layers for p in layer.parameters()]
     
     def __call__(self,x):
         outcome = []

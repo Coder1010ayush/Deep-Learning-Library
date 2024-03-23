@@ -1,13 +1,16 @@
+from matplotlib import pyplot as plt
 import torch
 from torch.autograd import Variable
 import torch.onnx
 import torchvision.models as models
 import numpy as np
-
+from sklearn.datasets import make_moons, make_blobs
 from Tensor.matrix import Tensor
 from nn.linear import NeuralNode,Layers,Dense
+from sklearn import model_selection
+from sklearn import metrics
 if __name__ == '__main__':
-    #making a single neurons
+    # making a single neurons
     # obj = NeuralNode(number_of_nodes=10,act=True)
 
     # print(obj)
@@ -56,34 +59,55 @@ if __name__ == '__main__':
 
     # let us work with torch autograd to know how gradient and backpropogation works in matrix
 
-    # x = torch.tensor(data=[1,2,3],requires_grad=True,dtype=float)
-    # y = torch.tensor(data=[1,2,3],requires_grad=True,dtype=float)
+    x = torch.tensor(data=[1,2,3],requires_grad=True,dtype=float)
+    y = torch.tensor(data=[1,2,3],requires_grad=True,dtype=float)
 
-    # a = torch.tensor(data=[1,2,3],requires_grad=True,dtype=float)
-    # b = torch.tensor(data=[1,2,3],requires_grad=True,dtype=float)
+    a = torch.tensor(data=[1,2,3],requires_grad=True,dtype=float)
+    b = torch.tensor(data=[1,2,3],requires_grad=True,dtype=float)
 
-    # p = x + y
-    # q = a*b
+    p = x + y
+    q = a*b
 
-    # z = p*q
-    # z.backward(torch.ones_like(input=z))
-    # print("p matrix is : ",p)
-    # print()
-    # print("q matrix is : ",q)
-    # print()
-    # print("grad of a : ",a.grad)
-    # print()
-    # print("grad of b : ",b.grad)
-    # print()
-    # print("grad of x : ",x.grad)
-    # print()
-    # print("grad of y : ",y.grad)
+    z = p*q
+    outcome = z.sigmoid()
+    outcome.backward(torch.ones_like(input=z))
+    print("grad of a : ",a.grad)
+    print("grad of b : ",b.grad)
+    print("grad of x : ",x.grad)
+    print("grad of y : ",y.grad)
 
-    # # print()
-    # # print()
-    # # print(torch.matmul(input=x+y,other=b.T))
+    x = Tensor(value=[1,2,3])
+    y = Tensor(value=[1,2,3])
 
-    # # print()
-    # # print()
-    # # print(torch.matmul(input=p,other=a.T))
+    a = Tensor(value=[1,2,3])
+    b = Tensor(value=[1,2,3])
 
+    p = x + y
+    q = a * b
+
+    z = p*q
+    outcome = z.sigmoid()
+    outcome.backward()
+    print()
+    print()
+    print("grad of x : ",x.grad)
+    print("grad of y : ",y.grad)
+    print("grad of a : ",a.grad)
+    print("grad of b : ",b.grad)
+
+
+
+    # testing out a dense layer neural network
+
+    nn = Dense(number_of_input=2,list_of_layers=[16,16,1],act=True)
+    print()
+    print(nn)
+    print("number of parameters : ", len(nn.parameters()))
+    X, y = make_moons(n_samples=100, noise=0.1)
+    y = y*2 - 1
+    # plt.figure(figsize=(5,5))
+    # plt.scatter(X[:,0], X[:,1], c=y, s=20, cmap='jet')
+    # plt.show()
+
+
+    
