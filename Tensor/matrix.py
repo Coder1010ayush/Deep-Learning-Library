@@ -18,6 +18,10 @@ class Tensor:
         self.children = set(subset)
         self.id = id(self)
 
+    def shape(self):
+        # print( f"TensorSize{(self.data).shape}")
+        return (self.data).shape
+
     def __repr__(self) -> str:
         return f"Tensor({self.data})"
 
@@ -280,9 +284,36 @@ class Tensor:
             self.grad = result*outcome.grad
         outcome._backward = _backward
         return outcome
+    
 
+    def binary_cross_entropy_with_logits(self, target):
+        """
+        Compute binary cross-entropy loss with logits.
 
+        Args:
+            target (Tensor): Target tensor with the same shape as self.
 
+        Returns:
+            Tensor: Binary cross-entropy loss.
+        """
+        eps = 1e-7  # avoiding zero division inf erro 
+        logits = self.data
+        target = target.data
+
+        # Apply sigmoid activation to logits # may be other function can be used. right now it is ok.
+        sigmoid_logits = 1 / (1 + np.exp(logits)) 
+
+        # Compute binary cross-entropy loss
+        loss_value = -(target * np.log(sigmoid_logits + eps) + (1 - target) * np.log(1 - sigmoid_logits + eps))
+        loss_tensor = Tensor(value=loss_value, operation="binary_cross_entropy_with_logits")
+
+        def _backward():
+            grad = (sigmoid_logits - target) / (sigmoid_logits * (1 - sigmoid_logits))
+            self.grad += grad * loss_tensor.grad
+
+        loss_tensor._backward = _backward
+        return loss_tensor
+ 
 if __name__ == '__main__':
     x = Tensor(value=[1,-2,3])
     y = Tensor(value= [1,2,3])
