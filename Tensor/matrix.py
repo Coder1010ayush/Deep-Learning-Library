@@ -285,7 +285,9 @@ class Tensor:
         outcome._backward = _backward
         return outcome
     
-
+    """"
+        # todo : implement below activation function
+    """
     def binary_cross_entropy_with_logits(self, target):
         """
         Compute binary cross-entropy loss with logits.
@@ -313,6 +315,34 @@ class Tensor:
 
         loss_tensor._backward = _backward
         return loss_tensor
+    
+    def cross_entropy(self, other):  # implementing cross entropy function's backpropogation 
+        out = None
+        def _backward():
+            self.grad = 0
+        out._backward = _backward
+        return out
+    
+    def mse(self , other):
+        out = None
+        def _backward():
+            self.grad = 0
+        out._backward = _backward
+        return out
+    
+    def rmse(self , other):
+        out = None
+        def _backward():
+            self.grad = 0
+        out._backward = _backward
+
+    def softmax(self , other):
+        out = None
+        def _backward():
+            self.grad = 0
+        out._backward = _backward
+        return out
+        
  
 if __name__ == '__main__':
     x = Tensor(value=[1,-2,3])
