@@ -13,6 +13,7 @@ from torch import nn
 from torch import functional as F
 from torch import _torch_docs
 from nn.cnn import conv
+from nn.pooling import MaxPool
 if __name__ == '__main__':
     # making a single neurons
     # obj = NeuralNode(number_of_nodes=10,act=True)
@@ -131,16 +132,63 @@ if __name__ == '__main__':
 
     # testing cnn conv layer class
 
-    conv_layer = conv(image_shape=(3,10,10),kernal_size=3,number_of_layers_of_kernal=5)
-    x = Tensor(value=np.random.random(size=(100,10,10)))
-    output = conv_layer.convolve(x)
-    print('ouptput is ' , output)
-    print('shape of output is ', output.shape)
+    # conv_layer = conv(image_shape=(3,10,10),kernal_size=3,number_of_layers_of_kernal=5)
+    # x = Tensor(value=np.random.random(size=(100,10,10)))
+    # output = conv_layer.convolve(x)
+    # print('ouptput is ' , output)
+    # print('shape of output is ', output.shape)
 
-    print()
-    print()
+    # print()
+    # print()
     
-    # backpropogate from here
-    grad = Tensor(value=np.random.random(size=output.shape))
-    grad = conv_layer.backward(output_gradient=grad.data,learning_rate=0.001)
-    print(grad)
+    # # backpropogate from here
+    # grad = Tensor(value=np.random.random(size=output.shape))
+    # grad = conv_layer.backward(output_gradient=grad.data,learning_rate=0.001)
+    # print(grad)
+
+
+    # start working on pooling layer
+    # arr = np.random.randint(low=10,high=1000,size=(7,7))
+    # print('data is ',arr)
+    # kernal_size = 3
+    # stride = 2
+    # row , col = arr.shape
+    # cnt = 0
+    # for i in range(row):
+    #     if cnt ==3:
+    #         break
+
+    #     if i+kernal_size > row:
+    #         break
+    #     for j in range(col):
+    #         if j+kernal_size > col:
+    #             break
+    #         mat = arr[i : i+kernal_size,j : j+kernal_size]
+    #         print(mat)
+
+    #         j += stride
+    #     i += stride
+    #     cnt += 0
+
+    # print(arr)
+    # kernal_size = 3 
+    # for batch,data in enumerate(arr):
+    #     print('batch is : ',batch)
+    #     row, col = data.shape
+    #     for i in range(0,row):
+    #         print(i)
+
+    # arr = np.random.randint(low=10,high=1000,size=(7,7))
+    # print(arr)
+    # print(np.max(a=arr))
+    arr = torch.randint(low=10,high=500,size=(10,32,31))
+    pool1 = nn.MaxPool2d(kernel_size=6,stride=2,padding=3)
+    pool2 = MaxPool(kernel_size=6,stride=2,padding=3)
+    y1 = pool1(arr)
+    print(y1.shape)
+    arr = Tensor(value=arr)
+    y2 = pool2.maxpool(arr)
+    print(y2.shape())
+
+
+#orch.Size([10, 4, 4])
