@@ -27,6 +27,8 @@ class Module:
 class NeuralNode(Module):
 
     def __init__(self,number_of_nodes,act = True) -> None:
+        if number_of_nodes <= 0:
+            raise ValueError(f"{number_of_nodes} can not be zero or negative!")
         self.act = act
         self.number_of_nodes = number_of_nodes
         self.weigths = []
