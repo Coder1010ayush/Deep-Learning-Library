@@ -54,6 +54,8 @@ class MaxPool:
                 if len(self.value_list) == batch * output_cols * output_rows:
                     break
                 j += self.kernel_size
+            if len(self.value_list) == batch * output_cols * output_rows :
+                    break
 
         return Tensor(value=np.array(self.value_list).reshape(batch, output_rows, output_cols))
 
@@ -69,35 +71,42 @@ class AveragePool:
     def avgpool(self,x):
         if len(x.data.shape) == 3:
             batch , row , col = x.data.shape
+            
 
         elif len(x.data.shape) == 2:
             row , col = x.data.shape
+            batch = 1
 
         else:
-            raise ValueError("not yet supported!")
+            raise ValueError("not supported shape of image_data!")
         
-        padded_arr = np.pad(x.data , ((0,0),(self.padding, self.padding),(self.padding , self.padding)) , mode= "constant")
-        output_cols = int(np.ceil( (row + 2*self.padding - self.kernal_size - 1 ) / self.stride ) + 1 )
-        output_rows = int(np.ceil( (col + 2*self.padding - self.kernal_size - 1) / self.stride ) + 1 )
+
+        padded_arr = np.pad(x.data , ((0,0), (self.padding,self.padding),(self.padding  , self.padding) ), mode="constant")
+        out_cols = int(np.ceil( (row+2*self.padding - self.kernal_size - 1) /self.stride )+1)
+        out_rows = int(np.ceil( (col + 2*self.padding - self.kernal_size - 1)/ self.stride) + 1)
 
         for i in range(0 , batch):
 
-            for j in range(0, row):
+            for j in range(0 , row):
                 if j + self.kernal_size > row + 2*self.padding:
                     break
-                for k in range(0, col):
+                for k in range(0 , col):
                     if k + self.kernal_size > col + 2*self.padding:
                         break
-                    filter_map = padded_arr[i , j: j + self.kernal_size, k:k+self.kernal_size]
+
+                    filter_map = padded_arr[i, j:j+self.kernal_size , k:k+self.kernal_size]
                     val = np.average(filter_map)
+                    # print(val)
                     self.value_list.append(val)
-                    k += self.stride
-
-                if len(self.value_list) == batch * output_cols * output_rows:
+                    K = k+self.stride
+                if len(self.value_list) == batch * out_cols * out_rows :
                     break
-                j += self.kernal_size
 
-        return Tensor(value= np.array(self.value_list).reshape(batch , output_rows ,output_cols))
+                j = j+ self.kernal_size
+            if len(self.value_list) == batch * out_cols * out_rows :
+                    break
+        # print(batch * out_cols * out_rows)
+        return Tensor(value=np.array(self.value_list).reshape(batch , out_rows , out_cols))
 
 
 class MinPool:
@@ -109,35 +118,41 @@ class MinPool:
 
     def minpool(self , x):
         if len(x.data.shape) == 3:
-                padded_arr = np.pad(x.data , ((0,0),(self.padding, self.padding),(self.padding , self.padding)) , mode= "constant")
-                output_cols = int(np.ceil( (row + 2*self.padding - self.kernal_size - 1 ) / self.stride ) + 1 )
-                output_rows = int(np.ceil( (col + 2*self.padding - self.kernal_size - 1) / self.stride ) + 1 )
+            batch , row , col = x.data.shape
+            
 
-                batch , row , col = x.data.shape 
-                for i in range(0 , batch):
-                 
-                    for j in range(0, row):
-                        if j + self.kernal_size > self.padding*2 + row :
-                            break
-                        for k in range(0 , col):
+        elif len(x.data.shape) == 2:
+            row , col = x.data.shape
+            batch = 1
 
-                            if k + self.kernal_size > self.padding * 2 + col:
-                                break
-                            filter_map = padded_arr[i , j: j+self.kernal_size , k : k+self.kernal_size]
-                            val = np.min(filter_map)
-                            self.value_list.append(val)
-                            if len(self.value_list ) == batch * output_cols * output_rows:
-                                break
-
-                        j += self.stride
-                    i += self.stride
-                    if len(self.value_list) == batch * output_cols * output_rows:
-                        break
         else:
-            raise ValueError("not supported yet!")
-        return Tensor(value= np.array(object=self.value_list).reshape(batch , output_rows, output_cols))
-                                       
-                
+            raise ValueError("not supported shape of image_data!")
+        
+
+        padded_arr = np.pad(x.data , ((0,0), (self.padding,self.padding),(self.padding  , self.padding) ), mode="constant")
+        out_cols = int(np.ceil( (row+2*self.padding - self.kernal_size - 1) /self.stride )+1)
+        out_rows = int(np.ceil( (col + 2*self.padding - self.kernal_size - 1)/ self.stride) + 1)
+
+        for i in range(0 , batch):
+
+            for j in range(0 , row):
+                if j + self.kernal_size > row + 2*self.padding:
+                    break
+                for k in range(0 , col):
+                    if k + self.kernal_size > col + 2*self.padding:
+                        break
+
+                    filter_map = padded_arr[i, j:j+self.kernal_size , k:k+self.kernal_size]
+                    val = np.min(filter_map)
+                    self.value_list.append(val)
+                    K = k+self.stride
+                if len(self.value_list ) == batch * out_cols * out_rows :
+                    break
+
+                j = j+ self.kernal_size
+            if len(self.value_list) == batch * out_cols * out_rows :
+                    break
+        return Tensor(value=np.array(self.value_list).reshape(batch , out_rows , out_cols))
 
 
 if __name__ == '__main__':

@@ -125,6 +125,7 @@ class Tensor:
         add_node(self)
 
         dot.render(filename, format='png', cleanup=True)
+        print("rendered")
 
 
     """

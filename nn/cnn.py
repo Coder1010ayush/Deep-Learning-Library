@@ -155,4 +155,8 @@ class Conv:
         # Update kernels and bias
         self.kernels -= learning_rate * kernels_gradient
         self.bias -= learning_rate * output_gradient
-        return input_gradient
+        return 
+    
+
+if __name__ == '__main__':
+    print('let us start!')

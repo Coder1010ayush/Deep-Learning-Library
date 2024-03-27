@@ -13,7 +13,7 @@ from torch import nn
 from torch import functional as F
 from torch import _torch_docs
 from nn.cnn import conv
-from nn.pooling import MaxPool
+from nn.pooling_single_channel import MaxPool
 if __name__ == '__main__':
 #     # making a single neurons
 #     # obj = NeuralNode(number_of_nodes=10,act=True)
@@ -189,7 +189,7 @@ if __name__ == '__main__':
 #     arr = Tensor(value=arr)
 #     y2 = pool2.maxpool(arr)
 #     print(y2.shape())
-    pass
+      pass
 
 
     
