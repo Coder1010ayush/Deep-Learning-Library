@@ -14,7 +14,7 @@ from torch import functional as F
 from torch import _torch_docs
 from nn.cnn import conv
 from nn.pooling_single_channel import MaxPool
-if __name__ == '__main__':
+# if __name__ == '__main__':
 #     # making a single neurons
 #     # obj = NeuralNode(number_of_nodes=10,act=True)
 
@@ -189,7 +189,53 @@ if __name__ == '__main__':
 #     arr = Tensor(value=arr)
 #     y2 = pool2.maxpool(arr)
 #     print(y2.shape())
-      pass
+      # pass
 
+import numpy as np
 
+class Tensor:
+    def __init__(self, data, requires_grad=False):
+        self.data = data
+        self.grad = np.zeros_like(data)
+        self.requires_grad = requires_grad
+        self._backward = lambda: None
+
+    def backward(self):
+        if self.requires_grad:
+            self._backward()
+
+class BinaryCrossEntropy:
+    def __init__(self):
+        self.eps = 1e-7
+
+    def __call__(self, input, target):
+        # Ensure input and target are Tensor instances
+        assert isinstance(input, Tensor) and isinstance(target, Tensor)
+
+        # Forward pass
+        loss_value = -np.mean(target.data * np.log(input.data + self.eps) + (1 - target.data) * np.log(1 - input.data + self.eps))
+        loss_tensor = Tensor(loss_value, requires_grad=input.requires_grad or target.requires_grad)
+
+        # Backward pass
+        def backward():
+            input.grad += (input.data - target.data) / (input.data * (1 - input.data) + self.eps) * loss_tensor.grad
+
+        loss_tensor._backward = backward
+        return loss_tensor
+
+# Example usage:
+input_data = np.array([0.1, 0.2, 0.3])
+target_data = np.array([0, 1, 0])
+
+input_tensor = Tensor(input_data, requires_grad=True)
+target_tensor = Tensor(target_data, requires_grad=False)
+
+bce = BinaryCrossEntropy()
+loss = bce(input_tensor, target_tensor)
+
+# Perform backward pass
+loss.backward()
+
+# Check gradients
+print(input_tensor.grad)
     

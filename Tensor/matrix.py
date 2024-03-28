@@ -4,14 +4,29 @@ import math
 import os
 import sys
 class Tensor:
+    """"
+    
+        This is a class that implements a general Tensor class building block for nueral networks.
+        this class supported a single scalar value and matrix value also.
+        this class internally make a computational graph for calculating gradient and there is a 
+        backward() function that allows to backpropogate through the graph and change the gradient of 
+        an expression.
 
+        This class also implements a number of activation function with defining its foward propogation 
+        as well as backward propogation simultaneousaly.
+
+        Note : There is a possibility to make a different class for all the activation function so that code readability and 
+        solid principle of software propgramming will not be voilating. 
+
+        Todo : Organise code according to solid prinicple.  #important !!@@!!
+    """
     def __init__(self,value, subset = (), operation= "") -> None:
         if isinstance(value, (int,float)):
             # this means value is scalar value 
-            self.data = np.array(value,dtype="float64")
+            self.data = np.array(value,dtype=float)
         else:
             # this means value is list 
-            self.data = np.array(object=value,dtype="float64")
+            self.data = np.array(object=value,dtype=float)
         self.sign = operation
         self.grad = 0
         self._backward = lambda : None
@@ -23,12 +38,20 @@ class Tensor:
         return (self.data).shape
 
     def __repr__(self) -> str:
-        return f"Tensor({self.data})"
+        return f"Tensor(data:{self.data},grad:{self.grad})"
 
     def __add__(self,other):
         if isinstance(other, (int,float)):
             other = Tensor(value=other)
             out = Tensor(np.add(self.data,other.data),subset=(self,other),operation="+")
+
+        elif isinstance(other, list):
+            if isinstance(self, Tensor):
+                ls = []
+                for   item in other:
+                    ls.append(Tensor(value=self.data + item.data))
+            return ls   
+        
         else:
             out = Tensor(np.add(self.data,other.data),subset=(self,other),operation="+")
 
@@ -46,8 +69,15 @@ class Tensor:
         if isinstance(other,(int,float)):
             other = Tensor(value=other)
             out = Tensor(value=np.multiply(self.data,other.data),subset=(self,other),operation="*")
+
+        # elif isinstance(other, list):
+        #     if isinstance(self, Tensor):
+        #         ls = []
+        #         for   item in other:
+        #             ls.append(Tensor(value=self.data * item.data))
+        #     return ls        
         else:
-            out = Tensor(value=np.multiply(self.data,other.data),operation="*",subset=(self,other))
+            out = self * other
 
         def _backward():
             self.grad = other.data * out.grad  # chain rule
@@ -73,6 +103,14 @@ class Tensor:
         # here other is scalar value 
         if isinstance(other, (int,float)):
             out = Tensor(value=self.data**other,subset=(self,),operation=f"**{other}")
+
+        elif isinstance(self, list):
+            if isinstance(other, Tensor):
+                ls = []
+                for   item in self:
+                    ls.append(Tensor(value=item.data ** other.data))
+            return ls  
+         
         else:
             raise ValueError("Not supported now")
         def _backward():
@@ -153,7 +191,7 @@ class Tensor:
         """
         outcome = Tensor(value=np.tanh(self.data),subset=(self,),operation="tanh")
         def _backward():
-            self.grad = (1-outcome.data**2)*out.grad
+            self.grad += (1-outcome.data**2)*out.grad
         outcome._backward = _backward
         return outcome
     
@@ -289,60 +327,82 @@ class Tensor:
     """"
         # todo : implement below activation function
     """
-    def binary_cross_entropy_with_logits(self, target):
+    
+    def binary_cross_entropy(self, other):  # here other  represents the target vector 
+        """"
+            function for binary cross entropy is given below : 
+            f(y{i}) = -1/N ( sigma (i=1 to n) y{i} * log(y{i}  (1-y{i})*log(1-y{i})) )
+        
         """
-        Compute binary cross-entropy loss with logits.
+        eps = 1e-7  # Small value to avoid numerical instability
+        loss_value = -np.mean(other.data * np.log(self.data + eps) + (1 - other.data) * np.log(1 - self.data + eps))
+        loss_tensor = Tensor(value=loss_value, subset=(self, other), operation='binary_cross_entropy')
 
-        Args:
-            target (Tensor): Target tensor with the same shape as self.
-
-        Returns:
-            Tensor: Binary cross-entropy loss.
-        """
-        eps = 1e-7  # avoiding zero division inf erro 
-        logits = self.data
-        target = target.data
-
-        # Apply sigmoid activation to logits # may be other function can be used. right now it is ok.
-        sigmoid_logits = 1 / (1 + np.exp(logits)) 
-
-        # Compute binary cross-entropy loss
-        loss_value = -(target * np.log(sigmoid_logits + eps) + (1 - target) * np.log(1 - sigmoid_logits + eps))
-        loss_tensor = Tensor(value=loss_value, operation="binary_cross_entropy_with_logits")
-
+        # defining backward pass or backpropogation for the binary_cross_entropy activation function 
         def _backward():
-            grad = (sigmoid_logits - target) / (sigmoid_logits * (1 - sigmoid_logits))
-            self.grad += grad * loss_tensor.grad
+            self.grad += (self.data - other.data) / (self.data * (1 - self.data) + eps) * loss_tensor.grad
 
         loss_tensor._backward = _backward
         return loss_tensor
     
-    def cross_entropy(self, other):  # implementing cross entropy function's backpropogation 
-        out = None
-        def _backward():
-            self.grad = 0
-        out._backward = _backward
-        return out
-    
-    def mse(self , other):
-        out = None
-        def _backward():
-            self.grad = 0
-        out._backward = _backward
-        return out
-    
-    def rmse(self , other):
-        out = None
-        def _backward():
-            self.grad = 0
-        out._backward = _backward
+    def categorical_cross_entropy(self , other):
+        """ 
+            function of categorical cross entropy is given below :
+            f =  {
+                        sigma(i=1 to n) sigma(j=1 to c) y{i}{j}' log(y{i}{j}')
+                    }
+        """
+        eps = 1e-7  # Small value to avoid numerical instability
+        loss_value = -np.mean(np.sum(other.data * np.log(self.data + eps), axis=1))
+        loss_tensor = Tensor(value=loss_value, subset=(self, other), operation='categorical_cross_entropy')
 
-    def softmax(self , other):
-        out = None
         def _backward():
-            self.grad = 0
-        out._backward = _backward
+            self.grad += -other.data / (self.data + eps) * loss_tensor.grad
+
+        loss_tensor._backward = _backward
+        return loss_tensor
+    
+
+    def mse(self , other):  # implementation of forward and backward propoogation of mean square error activation function  - generally used for linear or logistic regression or regression problems
+        N = len(self.data)
+        mse_value = np.mean(self.data - other.data)
+        mse_tensor = Tensor(value=mse_tensor, subset=(self, other), operation='mse')
+        def _backward():
+            self.grad = 2/N * (self.data - other.data) * mse_tensor.grad
+        mse_tensor._backward = _backward
         return out
+    
+    def rmse(self , other):  # implementation of forward and backpropogation of root mean squared error loss function - generally used for regression problems where outcome would be a numerical values.
+        mse_tensor = self.mse(other=other)
+
+        # Compute RMSE
+        rmse_value = np.sqrt(mse_tensor.data)
+        rmse_tensor = Tensor(value=rmse_value, subset=(self, other), operation='rmse')
+
+        def _backward():
+            rmse_grad = 1 / (2 * np.sqrt(mse_tensor.data))
+            # Derivative of MSE with respect to predicted values
+            mse_grad = mse_tensor.grad
+            # Chain rule: Derivative of RMSE with respect to predicted values
+            self.grad = rmse_grad * mse_grad
+
+        rmse_tensor._backward = _backward
+        return rmse_tensor
+
+            
+
+    def softmax(self):   # implementation of forward and backward propogation of softmax function for multi class labeling problems 
+        exp_values = np.exp(self.data)
+        softmax_values = exp_values / np.sum(exp_values)
+        outcome = Tensor(value=softmax_values, subset=(self,), operation='softmax')
+
+        def _backward():
+            N = len(self.data)
+            jacobian_matrix = np.diag(softmax_values) - np.outer(softmax_values, softmax_values)
+            self.grad = np.dot(jacobian_matrix, outcome.grad)
+
+        outcome._backward = _backward
+        return outcome
         
  
 if __name__ == '__main__':
