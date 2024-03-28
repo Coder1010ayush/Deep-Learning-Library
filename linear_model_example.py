@@ -82,7 +82,7 @@ if __name__ == '__main__':
     # print(outcome)
 
 
-
+    # ----------------------- end with getting similar output like pytorch --------------------------------------
 
 
 
