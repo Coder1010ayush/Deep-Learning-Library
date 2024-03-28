@@ -84,14 +84,7 @@ class Hei:
 
 class LeCun:  # nothing to much similar to hei initialization
 
-    def __init__(self, n_in, uniform,shape:tuple=None, shap
-                return Tensor(value=np.random.uniform(low=-scale , high=scale, size=self.shape))
-            return Tensor(value=np.random.uniform(low=-scale , high=scale, size=(self.n_in, self.n_in)))
-
-        else:
-            if self.shape_use:
-                return Tensor(value=np.random.normal(loc=0 , scale=scale, size=self.shape))
-            return Tensor(value=np.random.normal(loc=0 , scale=scale,e_use : bool = False) -> None:
+    def __init__(self, n_in, uniform,shape:tuple=None, shape_use:bool=False):
         self.n_in = n_in
         self.uniform = uniform
         self.shape_use = shape_use
@@ -108,10 +101,56 @@ class LeCun:  # nothing to much similar to hei initialization
             Normal distribution :
                 collection_set  = U(0,a)
                     where a is defined by given relationship 
-                    a  = (1/n_in) ** 0.5
+                        a  = (1/n_in) ** 0.5
         
         """
         scale = np.sqrt( 1/self.n_in) 
         if self.uniform:
-            if self.shape_use: size=(self.n_in, self.n_in)))
+            if self.shape_use:
+                return Tensor(value=np.random.uniform(low=-scale , high=scale, size=self.shape))
+            return Tensor(value=np.random.uniform(low=-scale , high=scale, size=(self.n_in, self.n_in)))
+
+        else:
+            if self.shape_use:
+                return Tensor(value=np.random.normal(loc=0 , scale=scale, size=self.shape))
+            return Tensor(value=np.random.normal(loc=0 , scale=scale, size=(self.n_in, self.n_in)))
+
+
+
+class ScaledStandaedDeviation: 
+
+    def __init__(self, inputs:np.ndarray, uniform : bool = False , shape:tuple = None) -> None:
+        self.shape = shape
+        self.uniform = uniform
+        self.inputs = inputs
+        
+    def feature_extractor(self):
+        self.flatten_x = self.inputs.flatten()
+        self.std = np.std(a=self.flatten_x)
+        self.mean = np.mean(a=self.flatten_x)
+
+    def initialize(self):
+        """
+            Uniform distribution :
+                collection_set = U(-a, a)
+                    where a is figured out by following formulae
+                        a = ( 1/ (rv)) ** 0.5
+                        rv = s**2/mean
+
+            Normal distribution :
+                collection_set  = U(0,a)
+                    where a is defined by given relationship 
+                        a  = (1/rv) ** 0.5
+                        rv = s**2/mean
+        
+        """
+        scale = np.sqrt( 1/self.rv ) 
+        self.rv = self.std**2
+        if self.uniform :
+            return Tensor(value=np.random.uniform(low=-scale,high=scale,size=self.shape))
+        
+
+        else:
+            return Tensor(value=np.random.normal(loc=0, scale=scale, size=self.shape))
+    
 
