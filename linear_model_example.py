@@ -17,7 +17,6 @@ from sklearn.datasets import make_moons as mm
 import matplotlib.pyplot as plt
 from Optimizer.base import SGD
 from sklearn.model_selection import train_test_split
-# from micrograd.nn import Layer,MLP,Value
 def prepare_dataset():
     # preparing or making a dataset
     x , y = mk_blob(n_samples=200, n_features=2, shuffle=True)
@@ -77,9 +76,11 @@ if __name__ == '__main__':
     model = Dense(n_input=10 , list_layers=[10,10,10])
     data = np.random.random(size=(10,10,5,20))
     params = model.parameters()
-    # print(len(params))
+    print(len(params))
     outcome = model(x=data)
-    # print(outcome)
+    print(outcome.shape())
+    print(outcome)
+    print(type(outcome))
 
 
     # ----------------------- end with getting similar output like pytorch --------------------------------------

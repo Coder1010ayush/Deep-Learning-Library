@@ -4,7 +4,7 @@ import numpy as np
 import json
 from Tensor.matrix import Tensor
 from nn.cnn import conv
-from nn.linear import NeuralNode , Layers , Dense
+from nn.linear import Node , Layer , Dense
 from nn.pooling_single_channel import MaxPool, MinPool , AveragePool
 from nn.pooling_multi_channel import MaxPool3D,AveragePool3D,MinPool3D
 
@@ -51,7 +51,7 @@ def test_linear_layers():
     """
         testing linear layers from nn.linear
     """
-    layer = Layers(number_of_input_nodes=10 , number_of_output_nodes= 20)
+    layer = Layer(n_input=10 , n_out= 20)
     print(layer)
     print(layer.parameters())
     print()
@@ -66,11 +66,11 @@ def test_node():
         testing single neuron from nn.linear 
     
     """
-    node = NeuralNode(number_of_nodes=10)
+    node = Node(n_input=10)
     print('node is : ',node)
     print('parameters are : ', node.parameters())
 
-    node = NeuralNode(number_of_nodes=6)
+    node = Node(n_input=6)
     print('node is : ',node)
     
 
@@ -155,7 +155,10 @@ def test_maxpool_color_channel():
     print('output shape is ',outcome.shape())
     print('data shape is ',image_data.shape())
 
+def testin_autograd_matrix_multiplication():
+    pass
 
+import torch
 if __name__ == '__main__':
     # test_node()
     # test_linear_layers()
@@ -166,7 +169,7 @@ if __name__ == '__main__':
     # test_maxpool_layer()
     # test_minpool_layer()
     # test_avg_pool_layer()
-    test_maxpool_color_channel()
+    # test_maxpool_color_channel()
     #image_data = Tensor(value=np.random.random(size=(3,3,5,5)))
     # for batch , data in enumerate(image_data.data):
     #     print('data is ',data)
@@ -174,6 +177,32 @@ if __name__ == '__main__':
     #     print('data shape is ',data.shape)
     #     print()
     #     print()
+    obj1 = Tensor(value=np.random.random(size=(2,2)))
+    obj2 = Tensor(value=np.random.random(size=(2,3)))
+    c = obj1 * obj2 # (2,3)
+    print('c is ', c)
+    print('shape of c is ',c.shape())
+    print()
+    obj3 = Tensor(value=np.random.random(size=(3,4)))
+    out = c * obj3
+    print('out is ', out)
+    print('shape of out is ',out.shape())
+    print()
+    out.backward()
+    print('out grad is ', out.grad)
+    print('shape of c is ',out.grad.shape)
+    print()
 
-    
+    print('obj3 grad is ',obj3.grad)
+    print('shape of obj3 grad is ',obj3.grad.shape)
+    print()
+
+    print(np.dot(c.data.T, out.grad))
+
+    out.visualize_graph()
+
+                  
+
+
+
     

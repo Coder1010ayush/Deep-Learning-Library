@@ -28,7 +28,7 @@ class Tensor:
             # this means value is list 
             self.data = np.array(object=value,dtype=float)
         self.sign = operation
-        self.grad = 0
+        self.grad = np.zeros_like(self.data)
         self._backward = lambda : None
         self.children = set(subset)
         self.id = id(self)
@@ -43,7 +43,7 @@ class Tensor:
     def __add__(self,other):
         if isinstance(other, (int,float)):
             other = Tensor(value=other)
-            out = Tensor(np.add(self.data,other.data),subset=(self,other),operation="+")
+            out = Tensor(np.add(self.data,other.data),subset=(self,other),operation="add")
 
         elif isinstance(other, list):
             if isinstance(self, Tensor):
@@ -53,7 +53,7 @@ class Tensor:
             return ls   
         
         else:
-            out = Tensor(np.add(self.data,other.data),subset=(self,other),operation="+")
+            out = Tensor(np.add(self.data,other.data),subset=(self,other),operation="add")
 
         def _backward():
             self.grad = out.grad * np.ones_like(self.data)
@@ -68,7 +68,7 @@ class Tensor:
     def __mul__(self,other):
         if isinstance(other,(int,float)):
             other = Tensor(value=other)
-            out = Tensor(value=np.dot(self.data,other.data),subset=(self,other),operation="*")
+            out = Tensor(value=np.dot(self.data,other.data),subset=(self,other),operation="mul")
 
         # elif isinstance(other, list):
         #     if isinstance(self, Tensor):
@@ -77,11 +77,11 @@ class Tensor:
         #             ls.append(Tensor(value=self.data * item.data))
         #     return ls        
         else:
-            out = Tensor(value=np.dot(self.data,other.data))
+            out = Tensor(value=np.dot(self.data,other.data),subset=(self, other),operation="mul")
 
         def _backward():
-            self.grad = other.data * out.grad  # chain rule
-            other.grad = self.data * out.grad # chain rule
+            self.grad = np.dot(out.grad, other.data.T) # chain rule
+            other.grad = np.dot(self.data.T ,out.grad) # chain rule
 
         out._backward = _backward
         return out
@@ -137,7 +137,7 @@ class Tensor:
                     build_graph(child)
                 graph_nodes.append(v)
         build_graph(self)
-        self.grad = np.array(1)
+        self.grad = np.ones_like(self.data)
         # print(graph_nodes)
         for v in reversed(graph_nodes):
             v._backward()
