@@ -1,19 +1,19 @@
-from matplotlib import pyplot as plt
-import torch
-from torch.autograd import Variable
-import torch.onnx
-import torchvision.models as models
-import numpy as np
-from sklearn.datasets import make_moons, make_blobs
-from Tensor.matrix import Tensor
-from nn.linear import NeuralNode,Layers,Dense
-from sklearn import model_selection
-from sklearn import metrics
-from torch import nn
-from torch import functional as F
-from torch import _torch_docs
-from nn.cnn import conv
-from nn.pooling_single_channel import MaxPool
+# from matplotlib import pyplot as plt
+# import torch
+# from torch.autograd import Variable
+# import torch.onnx
+# import torchvision.models as models
+# import numpy as np
+# from sklearn.datasets import make_moons, make_blobs
+# from Tensor.matrix import Tensor
+# from nn.linear import Node,Layer,Dense
+# from sklearn import model_selection
+# from sklearn import metrics
+# from torch import nn
+# from torch import functional as F
+# from torch import _torch_docs
+# from nn.cnn import conv
+# from nn.pooling_single_channel import MaxPool
 # if __name__ == '__main__':
 #     # making a single neurons
 #     # obj = NeuralNode(number_of_nodes=10,act=True)
@@ -191,51 +191,73 @@ from nn.pooling_single_channel import MaxPool
 #     print(y2.shape())
       # pass
 
-import numpy as np
+# import numpy as np
 
-class Tensor:
-    def __init__(self, data, requires_grad=False):
-        self.data = data
-        self.grad = np.zeros_like(data)
-        self.requires_grad = requires_grad
-        self._backward = lambda: None
+# class Tensor:
+#     def __init__(self, data, requires_grad=False):
+#         self.data = data
+#         self.grad = np.zeros_like(data)
+#         self.requires_grad = requires_grad
+#         self._backward = lambda: None
 
-    def backward(self):
-        if self.requires_grad:
-            self._backward()
+#     def backward(self):
+#         if self.requires_grad:
+#             self._backward()
 
-class BinaryCrossEntropy:
-    def __init__(self):
-        self.eps = 1e-7
+# class BinaryCrossEntropy:
+#     def __init__(self):
+#         self.eps = 1e-7
 
-    def __call__(self, input, target):
-        # Ensure input and target are Tensor instances
-        assert isinstance(input, Tensor) and isinstance(target, Tensor)
+#     def __call__(self, input, target):
+#         # Ensure input and target are Tensor instances
+#         assert isinstance(input, Tensor) and isinstance(target, Tensor)
 
-        # Forward pass
-        loss_value = -np.mean(target.data * np.log(input.data + self.eps) + (1 - target.data) * np.log(1 - input.data + self.eps))
-        loss_tensor = Tensor(loss_value, requires_grad=input.requires_grad or target.requires_grad)
+#         # Forward pass
+#         loss_value = -np.mean(target.data * np.log(input.data + self.eps) + (1 - target.data) * np.log(1 - input.data + self.eps))
+#         loss_tensor = Tensor(loss_value, requires_grad=input.requires_grad or target.requires_grad)
 
-        # Backward pass
-        def backward():
-            input.grad += (input.data - target.data) / (input.data * (1 - input.data) + self.eps) * loss_tensor.grad
+#         # Backward pass
+#         def backward():
+#             input.grad += (input.data - target.data) / (input.data * (1 - input.data) + self.eps) * loss_tensor.grad
 
-        loss_tensor._backward = backward
-        return loss_tensor
+#         loss_tensor._backward = backward
+#         return loss_tensor
 
 # Example usage:
-input_data = np.array([0.1, 0.2, 0.3])
-target_data = np.array([0, 1, 0])
+# input_data = np.array([0.1, 0.2, 0.3])
+# target_data = np.array([0, 1, 0])
 
-input_tensor = Tensor(input_data, requires_grad=True)
-target_tensor = Tensor(target_data, requires_grad=False)
+# input_tensor = Tensor(input_data, requires_grad=True)
+# target_tensor = Tensor(target_data, requires_grad=False)
 
-bce = BinaryCrossEntropy()
-loss = bce(input_tensor, target_tensor)
+# bce = BinaryCrossEntropy()
+# loss = bce(input_tensor, target_tensor)
 
-# Perform backward pass
-loss.backward()
+# # Perform backward pass
+# loss.backward()
 
-# Check gradients
-print(input_tensor.grad)
-    
+# # Check gradients
+# print(input_tensor.grad)
+
+
+# arr1 = np.random.random(size=(3,4))
+# arr2 = np.random.random(size=(4,3))
+# res = np.dot(arr1,arr2)
+# print(res)
+# print(res.shape)
+import numpy as np
+from Tensor.matrix import Tensor
+arr1 = Tensor(value=np.random.random(size=(4,3)))
+arr2 = Tensor(value=np.random.random(size=(3,4)))
+
+arr3 = arr1*10
+print(arr3)
+
+
+
+
+
+
+
+
+

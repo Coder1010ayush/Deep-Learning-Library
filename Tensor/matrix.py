@@ -68,7 +68,7 @@ class Tensor:
     def __mul__(self,other):
         if isinstance(other,(int,float)):
             other = Tensor(value=other)
-            out = Tensor(value=np.multiply(self.data,other.data),subset=(self,other),operation="*")
+            out = Tensor(value=np.dot(self.data,other.data),subset=(self,other),operation="*")
 
         # elif isinstance(other, list):
         #     if isinstance(self, Tensor):
@@ -77,7 +77,7 @@ class Tensor:
         #             ls.append(Tensor(value=self.data * item.data))
         #     return ls        
         else:
-            out = self * other
+            out = Tensor(value=np.dot(self.data,other.data))
 
         def _backward():
             self.grad = other.data * out.grad  # chain rule
@@ -405,6 +405,61 @@ class Tensor:
         return outcome
         
  
+
+
+    """
+    
+        A whole new section is started here.
+        Below here additional functionality will be added for the Tensor class objects for convinient to calculate linear algebra related expression.
+        as implementing new feature there will be backpropogation included so that externally , there is no need to implement it.
+        Here is a list of Additional features that will included or implemented : 
+            Element-wise operations:
+
+                Subtraction (__sub__)
+                Division (__truediv__)
+                Exponentiation (__pow__)
+                Absolute value (__abs__)
+                Square root (sqrt)
+                Exponential (exp)
+                Logarithm (log)
+
+
+            Reduction operations:
+                Sum along axes (sum)
+                Mean along axes (mean)
+                Maximum along axes (max)
+                Minimum along axes (min)
+                Argmax (argmax)
+                Argmin (argmin)
+            
+            Matrix operations:
+                Transpose (transpose)
+                Inverse (inverse)
+                Determinant (det)
+                Singular value decomposition (svd)
+                QR decomposition (qr)
+                Eigenvalue decomposition (eig)
+
+            Random operations:
+                Random initialization (random_init)
+                Random sampling from various distributions (normal, uniform, etc.)
+                Permutation (permute)
+
+            Manipulation operations:
+                Reshape (reshape)
+                Concatenation (concatenate)
+                Splitting (split)
+                Tile (tile)
+                Stack (stack)
+
+            Normalization operations:
+                Mean normalization
+                Standardization (z-score normalization)
+                Min-max normalization
+    
+    """
+
+
 if __name__ == '__main__':
     x = Tensor(value=[1,-2,3])
     y = Tensor(value= [1,2,3])

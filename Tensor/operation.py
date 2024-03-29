@@ -10,9 +10,18 @@
 """
 import os
 import sys
-from Tensor.tensor import Tensor
+import pathlib
+from Tensor.matrix import Tensor
+import math
+import numpy as np
 
-class Ops:
 
-    def __init__(self) -> None:
-        pass
+
+class Operations(Tensor):
+
+    def matmul(f_tensor:Tensor , s_tensor:Tensor):
+
+        """
+            this function multiply two tensor 
+        """
+        outcome = np.multiply()
