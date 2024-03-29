@@ -114,7 +114,7 @@ class Tensor:
         else:
             raise ValueError("Not supported now")
         def _backward():
-            self.grad = other * self.data**(other-1) *out.grad
+            self.grad += other * self.data**(other-1) *out.grad
         out._backward = _backward
         return out
     
@@ -125,7 +125,7 @@ class Tensor:
             raise ValueError("right now not supported!")
         
     def __rtruediv__(self,other):
-        return other * self**-1
+        return other * (self**-1)
 
     def backward(self):  # this function is the base function which generate computational graph for each node or tensor
         graph_nodes = []

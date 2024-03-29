@@ -240,11 +240,11 @@
 # print(input_tensor.grad)
 
 
-# arr1 = np.random.random(size=(3,4))
-# arr2 = np.random.random(size=(4,3))
-# res = np.dot(arr1,arr2)
-# print(res)
-# print(res.shape)
+arr1 = np.random.random(size=(3,4))
+arr2 = np.random.random(size=(4,3))
+res = np.dot(arr1,arr2)
+print(res)
+print(res.shape)
 import numpy as np
 from Tensor.matrix import Tensor
 arr1 = Tensor(value=np.random.random(size=(4,3)))
@@ -252,6 +252,9 @@ arr2 = Tensor(value=np.random.random(size=(3,4)))
 
 arr3 = arr1*10
 print(arr3)
+
+
+
 
 
 

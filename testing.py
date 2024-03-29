@@ -183,8 +183,8 @@ if __name__ == '__main__':
     print('c is ', c)
     print('shape of c is ',c.shape())
     print()
-    obj3 = Tensor(value=np.random.random(size=(3,4)))
-    out = c * obj3
+    obj3 = Tensor(value=np.random.random(size=(2,3)))
+    out = c + obj3
     print('out is ', out)
     print('shape of out is ',out.shape())
     print()
