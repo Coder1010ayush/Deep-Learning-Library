@@ -10,6 +10,7 @@
 
 """
 from Tensor.matrix import Tensor
+from initializer.xavier import Xavier , ScaledStandaedDeviation , LeCun , Hei
 from Optimizer.base import BaseOptimizerClass,NAG, SGD, Adam
 import os
 import collections
@@ -33,8 +34,10 @@ class Node(Module):   # implementing a single node with some weights and bias gi
     def __init__(self, n_input ):
         self.nin = n_input
         self.w = []
+        xev = Xavier(n_in=1, n_out=1)
         for i in range(self.nin):
-            x = np.random.random(size=1)
+            # x = np.random.random(size=1)
+            x = xev.initialize().data[0]
             self.w.append(x[0])
         self.weights = Tensor(value=self.w)
         self.bias = Tensor(value=0)

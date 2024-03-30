@@ -19,6 +19,7 @@ class Tensor:
         solid principle of software propgramming will not be voilating. 
 
         Todo : Organise code according to solid prinicple.  #important !!@@!!
+        
     """
     def __init__(self,value, subset = (), operation= "") -> None:
         if isinstance(value, (int,float)):
@@ -113,6 +114,7 @@ class Tensor:
          
         else:
             raise ValueError("Not supported now")
+            
         def _backward():
             self.grad += other * self.data**(other-1) *out.grad
         out._backward = _backward
@@ -328,136 +330,166 @@ class Tensor:
         # todo : implement below activation function
     """
     
-    def binary_cross_entropy(self, other):  # here other  represents the target vector 
-        """"
-            function for binary cross entropy is given below : 
-            f(y{i}) = -1/N ( sigma (i=1 to n) y{i} * log(y{i}  (1-y{i})*log(1-y{i})) )
+    # def binary_cross_entropy(self, other):  # here other  represents the target vector 
+    #     """"
+    #         function for binary cross entropy is given below : 
+    #         f(y{i}) = -1/N ( sigma (i=1 to n) y{i} * log(y{i}  (1-y{i})*log(1-y{i})) )
         
-        """
-        eps = 1e-7  # Small value to avoid numerical instability
-        loss_value = -np.mean(other.data * np.log(self.data + eps) + (1 - other.data) * np.log(1 - self.data + eps))
-        loss_tensor = Tensor(value=loss_value, subset=(self, other), operation='binary_cross_entropy')
+    #     """
+    #     eps = 1e-7  # Small value to avoid numerical instability
+    #     loss_value = -np.mean(other.data * np.log(self.data + eps) + (1 - other.data) * np.log(1 - self.data + eps))
+    #     loss_tensor = Tensor(value=loss_value, subset=(self, other), operation='binary_cross_entropy')
 
-        # defining backward pass or backpropogation for the binary_cross_entropy activation function 
-        def _backward():
-            self.grad += (self.data - other.data) / (self.data * (1 - self.data) + eps) * loss_tensor.grad
+    #     # defining backward pass or backpropogation for the binary_cross_entropy activation function 
+    #     def _backward():
+    #         self.grad += (self.data - other.data) / (self.data * (1 - self.data) + eps) * loss_tensor.grad
 
-        loss_tensor._backward = _backward
-        return loss_tensor
+    #     loss_tensor._backward = _backward
+    #     return loss_tensor
     
-    def categorical_cross_entropy(self , other):
-        """ 
-            function of categorical cross entropy is given below :
-            f =  {
-                        sigma(i=1 to n) sigma(j=1 to c) y{i}{j}' log(y{i}{j}')
-                    }
-        """
-        eps = 1e-7  # Small value to avoid numerical instability
-        loss_value = -np.mean(np.sum(other.data * np.log(self.data + eps), axis=1))
-        loss_tensor = Tensor(value=loss_value, subset=(self, other), operation='categorical_cross_entropy')
+    # def categorical_cross_entropy(self , other):
+    #     """ 
+    #         function of categorical cross entropy is given below :
+    #         f =  {
+    #                     sigma(i=1 to n) sigma(j=1 to c) y{i}{j}' log(y{i}{j}')
+    #                 }
+    #     """
+    #     eps = 1e-7  # Small value to avoid numerical instability
+    #     loss_value = -np.mean(np.sum(other.data * np.log(self.data + eps), axis=1))
+    #     loss_tensor = Tensor(value=loss_value, subset=(self, other), operation='categorical_cross_entropy')
 
-        def _backward():
-            self.grad += -other.data / (self.data + eps) * loss_tensor.grad
+    #     def _backward():
+    #         self.grad += -other.data / (self.data + eps) * loss_tensor.grad
 
-        loss_tensor._backward = _backward
-        return loss_tensor
+    #     loss_tensor._backward = _backward
+    #     return loss_tensor
     
 
-    def mse(self , other):  # implementation of forward and backward propoogation of mean square error activation function  - generally used for linear or logistic regression or regression problems
-        N = len(self.data)
-        mse_value = np.mean(self.data - other.data)
-        mse_tensor = Tensor(value=mse_tensor, subset=(self, other), operation='mse')
+    #  # implementation of forward and backward propoogation of mean square error activation function  - generally used for linear or logistic regression or regression problems
+    #     shape = self.data.shape
+    #     N = 1
+    #     for i in shape:
+    #         N *= i
+    #     mse_value = np.mean(self.data - other.data)
+    #     mse_tensor = Tensor(value=mse_value, subset=(self, other), operation='mse')
+    #     def _backward():
+    #         self.grad = 2/N * (self.data - other.data) * mse_tensor.grad
+    #     mse_tensor._backward = _backward
+    #     return mse_tensor
+    
+    def mse( self , other ): # implementation of forward and backpropogation of mean square activation function - generally used for linear or logistic regrressio or regression problems
+        # note that here self is y_pred , other is y_actual
+        # loss is calculated as the element wise difference of self and other and than taking the mean of that vector
+        N = self.data.flatten().shape[0]
+        loss = Tensor(value=np.mean( np.square ( self.data - other.data )  ),operation="mse",subset=(self, other) )
         def _backward():
-            self.grad = 2/N * (self.data - other.data) * mse_tensor.grad
-        mse_tensor._backward = _backward
-        return out
+            self.grad += (2 * (self.data - other.data) ) / N
+            other.grad += (2 * (other.data - self.data)) / N
+        loss._backward = _backward
+        return loss
     
     def rmse(self , other):  # implementation of forward and backpropogation of root mean squared error loss function - generally used for regression problems where outcome would be a numerical values.
-        mse_tensor = self.mse(other=other)
-
-        # Compute RMSE
-        rmse_value = np.sqrt(mse_tensor.data)
-        rmse_tensor = Tensor(value=rmse_value, subset=(self, other), operation='rmse')
-
+        
+         # note that here self is y_pred , other is y_actual
+         # loss is calculated as the element wise difference of self and other and than taking the mean of that vector and than square root of it.
+         # this is similar to mse loss function mainly used for numerical value prediction or regression problems in linear regression and logistics regression like problems 
+        shape = self.data.shape
+        N = 1
+        for i in shape:
+            N *= i
+        loss_value = np.sqrt(np.mean(self.data - other.data))
+        mse_loss = np.mean(np.square(self.data - other.data))
+        loss = Tensor(value=loss_value , subset=(self,other),operation="rmse")
         def _backward():
-            rmse_grad = 1 / (2 * np.sqrt(mse_tensor.data))
-            # Derivative of MSE with respect to predicted values
-            mse_grad = mse_tensor.grad
-            # Chain rule: Derivative of RMSE with respect to predicted values
-            self.grad = rmse_grad * mse_grad
 
-        rmse_tensor._backward = _backward
-        return rmse_tensor
-
+            self.grad += (1/2*mse_loss) * ((2*(self.data - other.data))/N) * loss.grad
+            other.grad += (1/2*mse_loss) * ((2*(other.data - self.data))/N) * loss.grad
+        loss._backward = _backward
+        return loss
             
 
-    def softmax(self):   # implementation of forward and backward propogation of softmax function for multi class labeling problems 
+    def softmax(self, other):   # implementation of forward and backward propogation of softmax function for multi class labeling problems 
+        # this is like a probablistic approach to find out the loss given y_pred and y_actual
+        
         exp_values = np.exp(self.data)
-        softmax_values = exp_values / np.sum(exp_values)
+        softmax_values = other.data / exp_values
         outcome = Tensor(value=softmax_values, subset=(self,), operation='softmax')
 
         def _backward():
-            N = len(self.data)
             jacobian_matrix = np.diag(softmax_values) - np.outer(softmax_values, softmax_values)
-            self.grad = np.dot(jacobian_matrix, outcome.grad)
+            self.grad = np.dot(jacobian_matrix, outcome.grad.T)
 
         outcome._backward = _backward
         return outcome
         
  
+    def hubour(self , other , alpha:float): # implemention of forward and backward propogation of hubiur loss function
+        """
+            this is a loss function which is used for maily regression (numerical output like problems).
+            it lies in between of mse (mean squared loss function) and rmse (root mean square loss function)
+            Mathematical function is :
+                f = {
+                    1/2 (y_pred - y_actual ) **2 if |(y_pred-y_actual)| < alpha
+                    alpha * (y_pres-y_actual ) - 1/2 * alpha * alpha , where |y_pred-y_actual| > alpha
+                }
+        """
+
+        # alpha would be given
+        error = np.abs(self.data - other.data)
+        error_loss = np.mean(error)
+        if error_loss <= alpha:
+            outcome = Tensor(value=1/2 *np.square(self.data - other.data) , subset=(self, other), operation="hubour" )
+        else:
+            outcome = Tensor(value=alpha * (self.data - other.data) -( 1/2*alpha ) , subset=(self,other), operation="hubour" )
 
 
-    """
-    
-        A whole new section is started here.
-        Below here additional functionality will be added for the Tensor class objects for convinient to calculate linear algebra related expression.
-        as implementing new feature there will be backpropogation included so that externally , there is no need to implement it.
-        Here is a list of Additional features that will included or implemented : 
-            Element-wise operations:
+        def _backward():
 
-                Subtraction (__sub__)
-                Division (__truediv__)
-                Exponentiation (__pow__)
-                Absolute value (__abs__)
-                Square root (sqrt)
-                Exponential (exp)
-                Logarithm (log)
+            if alpha >= error_loss:
+                self.grad = 1 * error * outcome.grad
+                other.grad = error * outcome.grad 
+            else:
+                self.grad = alpha*other.data * outcome.grad
+                other.grad = 0
+
+        outcome._backward = _backward
+        return outcome
 
 
-            Reduction operations:
-                Sum along axes (sum)
-                Mean along axes (mean)
-                Maximum along axes (max)
-                Minimum along axes (min)
-                Argmax (argmax)
-                Argmin (argmin)
+
+    def binary_cross_entropy(self, other):  # implementation of forward and backward pass of binary cross entropy
+        
+        """
+            this loss function is applicable for binary classes labels data.
+            it is also known as log loss activation function.
+            it is a standard activation function that is used in case of binary class classification.
+        
+            Mathematical formulation is given below :
+                L( y_true , y_pred ) = -[ y_true * log(y_pred)  + (1-y_true) * log( 1 - y_pred ) ]
             
-            Matrix operations:
-                Transpose (transpose)
-                Inverse (inverse)
-                Determinant (det)
-                Singular value decomposition (svd)
-                QR decomposition (qr)
-                Eigenvalue decomposition (eig)
+        """
+        #let us assume that self is y_true and other is y_pred
+        if self.data.shape == other.data.shape:
+            N = 1
+            for i in self.data.shape:
+                N  *= i
 
-            Random operations:
-                Random initialization (random_init)
-                Random sampling from various distributions (normal, uniform, etc.)
-                Permutation (permute)
+            outcome = Tensor(value=-1*(self.data * np.log(other.data)+ ((1-self.data) * np.log(1-other.data)) ) )
 
-            Manipulation operations:
-                Reshape (reshape)
-                Concatenation (concatenate)
-                Splitting (split)
-                Tile (tile)
-                Stack (stack)
+            def _backward():
+                self.grad = np.log(1-other.data) - np.log(other.data)
+                other.grad = 1/(1-other.data) - self.data/other.data  - self.data/(1-other.data)
 
-            Normalization operations:
-                Mean normalization
-                Standardization (z-score normalization)
-                Min-max normalization
-    
-    """
+
+            outcome._backward = _backward
+            return outcome
+        else:
+            raise ValueError(f"shape is not compatible {self.data.shape} and {other.data.shape}")
+        
+
+        # todo
+    def categorical_cross_entropy(self,other):   # implementation of forward and backward pass of categorical cross entropy
+        pass
 
 
 if __name__ == '__main__':

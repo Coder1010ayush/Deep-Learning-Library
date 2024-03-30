@@ -155,8 +155,20 @@ def test_maxpool_color_channel():
     print('output shape is ',outcome.shape())
     print('data shape is ',image_data.shape())
 
-def testin_autograd_matrix_multiplication():
-    pass
+def testing_autograd_matrix_multiplication():
+    obj1 = Tensor(value=[[1,2],[2,3]])
+    obj2 = Tensor(value=[[3,6],[4,2]])
+    obj3 = Tensor(value=[[1,3],[4,2]])
+    obj4 = Tensor(value=[[2,4],[6,2]])
+
+    out1 = obj1 * obj2
+    out2 = out1 * obj3
+    out3 = obj4 + out2
+
+    final_out = out3.relu()
+    final_out.backward()
+    final_out.visualize_graph(filename='matric_ops')
+
 
 import torch
 if __name__ == '__main__':
@@ -177,29 +189,38 @@ if __name__ == '__main__':
     #     print('data shape is ',data.shape)
     #     print()
     #     print()
-    obj1 = Tensor(value=np.random.random(size=(2,2)))
-    obj2 = Tensor(value=np.random.random(size=(2,3)))
-    c = obj1 * obj2 # (2,3)
-    print('c is ', c)
-    print('shape of c is ',c.shape())
-    print()
-    obj3 = Tensor(value=np.random.random(size=(2,3)))
-    out = c + obj3
-    print('out is ', out)
-    print('shape of out is ',out.shape())
-    print()
-    out.backward()
-    print('out grad is ', out.grad)
-    print('shape of c is ',out.grad.shape)
-    print()
+    #obj1 = Tensor(value=np.random.random(size=(2,2)))
+    # obj2 = Tensor(value=np.random.random(size=(2,3)))
+    # c = obj1 * obj2 # (2,3)
+    # print('c is ', c)
+    # print('shape of c is ',c.shape())
+    # print()
+    # obj3 = Tensor(value=np.random.random(size=(2,3)))
+    # out = c + obj3
+    # print('out is ', out)
+    # print('shape of out is ',out.shape())
+    # print()
+    # out.backward()
+    # print('out grad is ', out.grad)
+    # print('shape of c is ',out.grad.shape)
+    # print()
 
-    print('obj3 grad is ',obj3.grad)
-    print('shape of obj3 grad is ',obj3.grad.shape)
-    print()
+    # print('obj3 grad is ',obj3.grad)
+    # print('shape of obj3 grad is ',obj3.grad.shape)
+    # print()
 
-    print(np.dot(c.data.T, out.grad))
+    # print(np.dot(c.data.T, out.grad))
 
-    out.visualize_graph()
+    # out.visualize_graph()
+    # testing_autograd_matrix_multiplication()
+    y_pred = Tensor(value=np.random.random(size=(1,10)) )
+    y_actual = Tensor(value=np.random.random(size=(1,10)) )
+    loss = y_actual.mse(y_pred)
+    print(loss)
+    print(loss.shape())
+    # pass
+
+
 
                   
 
