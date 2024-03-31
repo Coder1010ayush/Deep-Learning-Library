@@ -4,10 +4,10 @@ import numpy as np
 import json
 from Tensor.matrix import Tensor
 from nn.cnn import conv
-from nn.linear import Node , Layer , Dense
+# from nn.linear import Node , Layer , Dense
 from nn.pooling_single_channel import MaxPool, MinPool , AveragePool
 from nn.pooling_multi_channel import MaxPool3D,AveragePool3D,MinPool3D
-
+from nn.linear_nn import Node,Layer,Dense #, Layer , Dense
 
 def testing_autograd_basic_scalar_expr():
 
@@ -246,13 +246,14 @@ if __name__ == '__main__':
     # testing_autograd_for_linear_layer()
 
     #node1 = Dense(n_input=10,list_layers=[10,10,2])
-    nodel = Dense(n_input=10 , list_layers=[10,20,1])
-    print(nodel)
-    params = nodel.parameters()
-    data = np.random.random(size=(10,10))
-    inputs = [list(map(Tensor, xrow)) for xrow in data]
-    out = nodel(x=inputs)
-    print(out)
+    # nodel = Dense(n_input=10 , list_layers=[10,20,1])
+    # print(nodel)
+    # params = nodel.parameters()
+    # data = np.random.random(size=(10,10))
+    # inputs = [list(map(Tensor, xrow)) for xrow in data]
+    # out = nodel(x=inputs)
+    # print(out)
+    # print(len(out))
 
 
     # print()
@@ -272,6 +273,29 @@ if __name__ == '__main__':
 
 
 
+    """
+        let us test linear_nn.py! is it working fine?
+    """
+    # data = np.random.random(size=(10,10))
+    # # inputs = [list(map(Tensor, xrow)) for xrow in data]
+    # node = Node(n_input=10)
+    # out = node(x=data)
+    # print('out is : ', out)
+    # params = node.parameters()
+    # print('parameters are : ', params)
+
+    data = np.random.random(size=(100,10))
+    # inputs = [list(map(Tensor, xrow)) for xrow in data]
+    #node = Layer(n_input=10,n_out=5)
+    node = Dense(n_input=10 , list_of_layer=[20,15,10,21])
+    out = node(x=data)
+    print('out is : ', out)
+    print(out.shape)
+    params = node.parameters()
+    print('parameters are : ', len(params))
+
+
+    
 
                   
 

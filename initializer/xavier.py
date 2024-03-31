@@ -17,12 +17,12 @@ import random
 
 class Xavier:
 
-    def __init__(self,n_in , n_out,uniform:bool = False) -> None:
+    def __init__(self,n_in , n_out ,uniform:bool = False) -> None:
         self.n_in = n_in
         self.n_out = n_out
         self.uniform = uniform
 
-    def initialize(self):
+    def initialize(self,shape):
 
         """Uniform initialization : 
                     this is how xaviar initializer works 
@@ -39,11 +39,11 @@ class Xavier:
         """
         if self.uniform:  # this will call when the uniform xavier will be called as a  initializer 
             scale = np.sqrt( 6/(self.n_in + self.n_out) )
-            return Tensor(value= np.random.uniform(size=(self.n_in, self.n_out), low=-scale , high= scale))
+            return Tensor(value= np.random.uniform(size=shape, low=-scale , high= scale))
 
         else:  # this is spelled to call when the normal xavoer distribution is called as a initializer
             scale = np.square( 2/(self.n_in+self.n_out)  )
-            return Tensor(value=np.random.normal(loc=0 , scale=scale , size=(self.n_in , self.n_out)))
+            return Tensor(value=np.random.normal(loc=0 , scale=scale , size=shape))
 
 
 

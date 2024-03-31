@@ -9,7 +9,7 @@ class Tensor():
 
     def __init__(self,value,subset = (),operation = '') -> None:
         self.data = value
-        self.grad = np.array(0)
+        self.grad = 0
         self._backward = lambda : None
         self.children = set(subset)
         self.sign = operation
@@ -43,7 +43,8 @@ class Tensor():
         if isinstance(other,Tensor):
             out = Tensor(self.data*other.data,operation='*',subset=(self,other))
         else:
-            other = Tensor(other)
+            print(self)
+            print(other)
             out = Tensor(other.data*self.data,operation='*',subset=(self,other))
 
         def _backward():
@@ -242,7 +243,7 @@ class Tensor():
                     build_graph(child)
                 graph_nodes.append(v)
         build_graph(self)
-        self.grad = np.array(1)
+        self.grad = 1
         # print(graph_nodes)
         for v in reversed(graph_nodes):
             v._backward()

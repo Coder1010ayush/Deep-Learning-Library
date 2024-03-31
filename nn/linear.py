@@ -68,7 +68,7 @@ class Node(Module):   # implementing a single node with some weights and bias gi
                 data_list.append(item.data)
             data_matrix = Tensor(value=np.array(object=weight_list))
             
-            val = Tensor(value=np.dot(data_matrix.data.T , weight_matrix.data))
+            val = Tensor(value=np.dot(data_matrix.data.T , weight_matrix.data)+self.bias)
             outcome.append(val)
         if len(outcome) == 1:
             return outcome[0]
@@ -112,15 +112,10 @@ class Layer(Module):   # implementing a single layer of nodes
             out = out.reshape(len(x),)
         else:
             out = out.reshape(len(x),self.n_outs) 
+            return out.tolist()
          # output column must be same as n_outs and number of columns in input must be same as n_input than reshaping will happen correctly otherwise error will be raised!
-        if len(outcome) == 1:
-            # print('single element')
-            return outcome[0]
-        else:
-            # print('length of outcome list is ', len(outcome))
-            # print('multilple elements')
-            # print()
-            return out.tolist() 
+        return out.tolist()
+        
        
         
 
