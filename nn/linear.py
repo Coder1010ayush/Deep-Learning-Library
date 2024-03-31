@@ -108,15 +108,18 @@ class Layer(Module):   # implementing a single layer of nodes
             val = node(x)
             outcome.extend(val)
         out = np.array(object=outcome)
-        out = out.reshape(len(x),self.n_outs) 
+        if self.n_outs == 1:
+            out = out.reshape(len(x),)
+        else:
+            out = out.reshape(len(x),self.n_outs) 
          # output column must be same as n_outs and number of columns in input must be same as n_input than reshaping will happen correctly otherwise error will be raised!
         if len(outcome) == 1:
-            print('single element')
+            # print('single element')
             return outcome[0]
         else:
-            print('length of outcome list is ', len(outcome))
-            print('multilple elements')
-            print()
+            # print('length of outcome list is ', len(outcome))
+            # print('multilple elements')
+            # print()
             return out.tolist() 
        
         
