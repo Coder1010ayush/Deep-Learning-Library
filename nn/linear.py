@@ -61,6 +61,8 @@ class Node(Module):   # implementing a single node with some weights and bias gi
         weight_matrix = Tensor(value=np.array(object=weight_list))
         for row in x:
             # converting row tensor list into tensor matrix
+            # print('start! from here !')
+            # print(row)
             data_list = []
             for item in row:
                 data_list.append(item.data)
@@ -102,7 +104,10 @@ class Layer(Module):   # implementing a single layer of nodes
         outcome = []
         for node in self.nodes:
             val = node(x)
-        return val
+            outcome.extend(val)
+        out = np.array(object=outcome)
+        out = out.reshape(len(x),self.n_outs)
+        return out.tolist()
        
         
 
@@ -130,9 +135,10 @@ class Dense(Module):
         outcome = []
         cnt = 0
         for layer in self.layers:
-            print(layer)
-            out = layer(x=x)
-        return out
+            
+            x = layer(x=x)
+            
+        return x
 
 
     

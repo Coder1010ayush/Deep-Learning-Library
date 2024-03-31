@@ -245,17 +245,22 @@ if __name__ == '__main__':
     # print(loss.shape())
     # testing_autograd_for_linear_layer()
 
-    node1 = Layer(n_input=10,n_out=3)
-    print(node1)
-    params = node1.parameters()
+    #node1 = Dense(n_input=10,list_layers=[10,10,2])
+    nodel = Dense(n_input=10 , list_layers=[10,20,3])
+    print(nodel)
+    params = nodel.parameters()
     # print(params)
     # print()
     data = np.random.random(size=(200,10))
     inputs = [list(map(Tensor, xrow)) for xrow in data]
-    out = node1(x=inputs)
+    out = nodel(x=inputs)
     # print(inputs)
     # print(len(inputs))
     print(len(out))
+    print(out[0])
+    print(len(out[0]))
+    print()
+    print(out)
 
 
     # print()
