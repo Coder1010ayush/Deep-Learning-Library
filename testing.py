@@ -170,6 +170,31 @@ def testing_autograd_matrix_multiplication():
     final_out.visualize_graph(filename='matric_ops')
 
 
+
+def testing_autograd_for_linear_layer():
+    """
+        let us assume our linear layer has 100 nodes or perceptron.
+    """
+    x_data = Tensor(value= np.random.random(size=(10,3)) )
+    layer1 = Layer(n_input=3 , n_out=10)
+    layer2 = Layer(n_input=10,n_out=5)
+    pred1 = layer1(x=x_data.data)
+    out1 = pred1.tanh()
+    out1.backward()
+    pred2 = layer2(x=out1.data)
+
+    y_pred = pred2.tanh()
+    y_pred.backward()
+    print('grad of out1 is ', out1.grad)
+    print()
+    print('grad of pred1 is ', pred1.grad)
+    print()
+    print('grad of pred2 is ', pred2.grad)
+    print()
+    print('grad of y_pred is ', y_pred.grad)
+    y_pred.visualize_graph(filename="linear")
+
+
 import torch
 if __name__ == '__main__':
     # test_node()
@@ -213,12 +238,41 @@ if __name__ == '__main__':
 
     # out.visualize_graph()
     # testing_autograd_matrix_multiplication()
-    y_pred = Tensor(value=np.random.random(size=(1,10)) )
-    y_actual = Tensor(value=np.random.random(size=(1,10)) )
-    loss = y_actual.mse(y_pred)
-    print(loss)
-    print(loss.shape())
-    # pass
+    # y_pred = Tensor(value=np.random.random(size=(1,10)) )
+    # y_actual = Tensor(value=np.random.random(size=(1,10)) )
+    # loss = y_actual.mse(y_pred)
+    # print(loss)
+    # print(loss.shape())
+    # testing_autograd_for_linear_layer()
+
+    node1 = Dense(n_input=10,list_layers=[10,20,3])
+    print(node1)
+    params = node1.parameters()
+    # print(params)
+    # print()
+    data = np.random.random(size=(200,10))
+    inputs = [list(map(Tensor, xrow)) for xrow in data]
+    out = node1(x=inputs)
+    # print(inputs)
+    # print(len(inputs))
+    print(len(out))
+
+
+    # print()
+    # layer = Layer(n_input=10,n_out=10)
+    # print(layer)
+    # params = layer.parameters()
+    # print(params)
+    # print(len(params))
+
+   # print()
+    # print()
+    # dense = Dense(n_input=10 , list_layers=[10,20,10])
+    # print(dense)
+    # params = dense.parameters()
+    # print(params)
+    # print(len(params))
+
 
 
 

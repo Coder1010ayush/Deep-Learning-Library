@@ -46,12 +46,12 @@ class Tensor:
             other = Tensor(value=other)
             out = Tensor(np.add(self.data,other.data),subset=(self,other),operation="add")
 
-        elif isinstance(other, list):
-            if isinstance(self, Tensor):
-                ls = []
-                for   item in other:
-                    ls.append(Tensor(value=self.data + item.data))
-            return ls   
+        # elif isinstance(other, list):
+        #     if isinstance(self, Tensor):
+        #         ls = []
+        #         for   item in other:
+        #             ls.append(Tensor(value=self.data + item.data))
+        #     return ls   
         
         else:
             out = Tensor(np.add(self.data,other.data),subset=(self,other),operation="add")
@@ -69,14 +69,8 @@ class Tensor:
     def __mul__(self,other):
         if isinstance(other,(int,float)):
             other = Tensor(value=other)
-            out = Tensor(value=np.dot(self.data,other.data),subset=(self,other),operation="mul")
-
-        # elif isinstance(other, list):
-        #     if isinstance(self, Tensor):
-        #         ls = []
-        #         for   item in other:
-        #             ls.append(Tensor(value=self.data * item.data))
-        #     return ls        
+            out = Tensor(value=self.data * other.data,subset=(self,other),operation="mul")
+       
         else:
             out = Tensor(value=np.dot(self.data,other.data),subset=(self, other),operation="mul")
 
@@ -193,7 +187,7 @@ class Tensor:
         """
         outcome = Tensor(value=np.tanh(self.data),subset=(self,),operation="tanh")
         def _backward():
-            self.grad += (1-outcome.data**2)*out.grad
+            self.grad += (1-outcome.data**2)*outcome.grad
         outcome._backward = _backward
         return outcome
     
@@ -381,7 +375,7 @@ class Tensor:
         # note that here self is y_pred , other is y_actual
         # loss is calculated as the element wise difference of self and other and than taking the mean of that vector
         N = self.data.flatten().shape[0]
-        loss = Tensor(value=np.mean( np.square ( self.data - other.data )  ),operation="mse",subset=(self, other) )
+        loss = Tensor(value=np.mean( np.square ( self.data - other.data )  ),operation="mse",subset=(self,other) )
         def _backward():
             self.grad += (2 * (self.data - other.data) ) / N
             other.grad += (2 * (other.data - self.data)) / N
