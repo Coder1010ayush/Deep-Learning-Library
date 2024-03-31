@@ -106,7 +106,7 @@ class Layer(Module):   # implementing a single layer of nodes
             val = node(x)
             outcome.extend(val)
         out = np.array(object=outcome)
-        out = out.reshape(len(x),self.n_outs)
+        out = out.reshape(len(x),self.n_outs)  # output column must be same as n_outs and number of columns in input must be same as n_input than reshaping will happen correctly otherwise error will be raised!
         return out.tolist()
        
         
