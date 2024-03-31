@@ -249,7 +249,7 @@ if __name__ == '__main__':
     nodel = Dense(n_input=10 , list_layers=[10,20,3])
     print(nodel)
     params = nodel.parameters()
-    # print(params)
+    print(params)
     # print()
     data = np.random.random(size=(200,10))
     inputs = [list(map(Tensor, xrow)) for xrow in data]
@@ -260,7 +260,7 @@ if __name__ == '__main__':
     print(out[0])
     print(len(out[0]))
     print()
-    print(out)
+    #print(out)
 
 
     # print()
