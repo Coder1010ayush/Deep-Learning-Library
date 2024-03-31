@@ -245,7 +245,7 @@ if __name__ == '__main__':
     # print(loss.shape())
     # testing_autograd_for_linear_layer()
 
-    node1 = Dense(n_input=10,list_layers=[10,20,3])
+    node1 = Layer(n_input=10,n_out=3)
     print(node1)
     params = node1.parameters()
     # print(params)

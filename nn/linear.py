@@ -103,6 +103,7 @@ class Layer(Module):   # implementing a single layer of nodes
         for node in self.nodes:
             val = node(x)
         return val
+       
         
 
         
