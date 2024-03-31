@@ -246,21 +246,13 @@ if __name__ == '__main__':
     # testing_autograd_for_linear_layer()
 
     #node1 = Dense(n_input=10,list_layers=[10,10,2])
-    nodel = Dense(n_input=10 , list_layers=[10,20,3])
+    nodel = Dense(n_input=10 , list_layers=[10,20,1])
     print(nodel)
     params = nodel.parameters()
-    print(params)
-    # print()
-    data = np.random.random(size=(200,10))
+    data = np.random.random(size=(10,10))
     inputs = [list(map(Tensor, xrow)) for xrow in data]
     out = nodel(x=inputs)
-    # print(inputs)
-    # print(len(inputs))
-    print(len(out))
-    print(out[0])
-    print(len(out[0]))
-    print()
-    #print(out)
+    print(out)
 
 
     # print()
