@@ -77,7 +77,7 @@ class Layer(Module):
         self.w = xv.initialize(shape=(self.n_input,self.n_outs)).data
 
     def __repr__(self) -> str:
-        return f"Layer of [{', '.join('LinearNode'+str(self.n_input) for n in self.n_input)}]"
+        return f"Layer of [{', '.join('LinearNode'+str(self.n_input) for n in range(self.n_input ))}]"
     
     def parameters(self):
         params = []
@@ -115,7 +115,7 @@ class Dense(Module):
         for layer in self.layers:
             
             x = layer(x=x)
-            print('shape of x is ', x.shape)
+           # print('shape of x is ', x.shape)
 
         return x
     

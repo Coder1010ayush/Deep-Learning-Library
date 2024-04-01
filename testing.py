@@ -4,10 +4,10 @@ import numpy as np
 import json
 from Tensor.matrix import Tensor
 from nn.cnn import conv
-# from nn.linear import Node , Layer , Dense
+from nn.linear import Node , Layer , Dense
 from nn.pooling_single_channel import MaxPool, MinPool , AveragePool
 from nn.pooling_multi_channel import MaxPool3D,AveragePool3D,MinPool3D
-from nn.linear_nn import Node,Layer,Dense #, Layer , Dense
+# from nn.linear_nn import Node,Layer,Dense #, Layer , Dense
 
 def testing_autograd_basic_scalar_expr():
 
@@ -284,16 +284,22 @@ if __name__ == '__main__':
     # params = node.parameters()
     # print('parameters are : ', params)
 
-    data = np.random.random(size=(100,10))
+    data = np.random.random(size=(10,10)).tolist()
     # inputs = [list(map(Tensor, xrow)) for xrow in data]
     #node = Layer(n_input=10,n_out=5)
-    node = Dense(n_input=10 , list_of_layer=[20,15,10,21])
+    node = Dense(n_input=10 , list_of_layer=[10,15,1])
+   # node = Node(n_input=10)
     out = node(x=data)
     print('out is : ', out)
-    print(out.shape)
+    print(len(out))
     params = node.parameters()
     print('parameters are : ', len(params))
+    # print('params are ', params)
+    
 
+
+
+    
 
     
 

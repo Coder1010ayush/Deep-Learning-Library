@@ -1,154 +1,159 @@
-""""
-    implementation of Single node with some weights and bias.
-    implementation of Single Layer with any number of Single Nodes 
-    implementation of a whole connected dense layer according to given information about layers.
+"""
+
+    implementing all the single neural node , single layer of nodes and a danse layer
+    this is based on numpy for fast calculation and wrapper class Tensor.
+    this works for n dimensional data.
+"""
 
 
-    Structure will be similar as pytorch,
-        there will a Module class that will be inherited by each single class , Module class defined the weights and biases.
-        it incorporates a parameters function similar to pytorch that will returns all the weights and biases of the network. 
+import numpy as np
+import os
+import sys
+from Tensor.matrix import Tensor
+from initializer.xavier import Hei,Xavier
 
 """
-from Tensor.matrix import Tensor
-from initializer.xavier import Xavier , ScaledStandaedDeviation , LeCun , Hei
-from Optimizer.base import BaseOptimizerClass,NAG, SGD, Adam
-import os
-import collections
-import sys
-import numpy as np
-import random
-
-
-class Module:   # a base class for all nueral network architecture because every nn must have zero_grad and parameters function
+    similar to pytorch 
+    defining Module class which have two function 
+        01. zero_grad -- for initializing all the grad of weight and bias with zero
+        02. parameters -- this is just for initializing parameters with an empty list
+    this class acts as a base class for all other class Node , Layer and Dense.
+"""
+class Module:
 
     def zero_grad(self):
-        
         for param in self.parameters():
-            param.grad = 0.0
+            param.grad = 0
 
-    
     def parameters(self):
         return []
     
-class Node(Module):   # implementing a single node with some weights and bias given 
+"""
 
-    def __init__(self, n_input):
-        # initialising the weight of the node using Hei method
-        # more references in xavier.py
+this class implements working of a single node with a given value that is the number of weights 
+and there is a single bias assosiated to this node.
+this will use in a single Layer formation
+
+"""
+
+def toTensor(x:list):
+    loc = []
+    for i in x:
+        if isinstance(i , list):
+            loc.append(toTensor(i))
+        else:
+            t = Tensor(value=i)
+            loc.append(t)
+    return loc
+
+def tonumpy(x:list):
+        loc = []
+        for item in x:
+            if isinstance(item , list):
+                loc.append(tonumpy(item))
+            else:
+                loc.append(item.data)
+        if len(loc) == 1:
+            return loc[0]
+        return loc
+    
+
+
+
+class Node(Module):
+
+    def __init__(self,n_input) -> None:
+        self.n_input = n_input
         hei = Hei(n_in=n_input,uniform=True,shape=(1,1))
-        self.weights = [Tensor(value=hei.initialize().data[0][0]) for _ in range(n_input)]
-        self.bias = Tensor(0)
+        self.w = None
+        weigths = []
+        self.bias = 0
+        for i in range(self.n_input):
+            x = hei.initialize().data[0][0]
+            weigths.append(x)
+        self.w = np.array(object=weigths)
 
-
-
-    def parameters(self):
-        # print('weigth is : ', self.weights)
-        # print('bias is : ',self.bias)
-        return self.weights + [self.bias]
-    
-
-    def __repr__(self):
-        return f"LinearNode{len(self.weights)}"
-    
-
-    
+    def __repr__(self) -> str:
+        return f"Node({self.n_input})"
     
     def __call__(self,x):
-        outcome = []
-        weight_list = []
-        for item in self.weights:
-            weight_list.append(item.data)
-        weight_matrix = Tensor(value=np.array(object=weight_list))
-        for row in x:
-            # converting row tensor list into tensor matrix
-            # print('start! from here !')
-            # print(row)
-            data_list = []
-            for item in row:
-                data_list.append(item.data)
-            data_matrix = Tensor(value=np.array(object=weight_list))
-            
-            val = Tensor(value=np.dot(data_matrix.data.T , weight_matrix.data)+self.bias)
-            outcome.append(val)
-        if len(outcome) == 1:
-            return outcome[0]
+        out = np.dot(x , self.w) + self.bias
+        outcome  = out.flatten().tolist()
+        outcome = toTensor(x=outcome)
+        
         return outcome
-            
-
-
-
-class Layer(Module):   # implementing a single layer of nodes 
-
-    def __init__(self, n_input, n_out):
-        self.n_in = n_input
-        self.n_outs = n_out
-        self.nodes = []
-
-        for i in range(0, self.n_outs):
-            self.nodes.append(Node(n_input=n_input))
-    
     
     def parameters(self):
-        self.params = []
-        for node in self.nodes:
-            self.params.extend(node.parameters())
-        return self.params
+        return toTensor(self.w.flatten().tolist()) + [self.bias]
     
-    def __repr__(self):
-        return f"Layer of [{', '.join(str(n) for n in self.nodes)}]"
+
+"""
+
+    this class implements a layer of given n_input nodes.
+    each node has n_outs number of bias 
+    each node has n_input times n_outs of weights 
+    this is used for Dense Network formation
+
+"""
+class Layer(Module):
+
+    def __init__(self,n_input , n_out) -> None:
+        self.n_input = n_input
+        self.n_outs = n_out
+        xv = Xavier(n_in=self.n_input, n_out=self.n_outs,uniform=True)
+        self.bias = xv.initialize(shape=(self.n_outs)).data
+        self.w = xv.initialize(shape=(self.n_input,self.n_outs)).data
+
+    def __repr__(self) -> str:
+        return f"Layer of [{', '.join('LinearNode'+str(self.n_input) for n in range(self.n_input ))}]"
     
-    """
-        for optimising this step we have to deep dive into some other special optimised linear algebra library and some hardware side maily parallel computinng concept. 
-        this works for 100*100 matrix fine. may be optimised it using some kind of sparse matrix concept also . for now it is sufficient.
+    def parameters(self):
+        params = []
+        w = self.w.flatten().tolist()
+        b = self.bias.tolist()
+        return toTensor(w) + toTensor(b)
+    
+    def __call__(self,x):
+        out = np.dot(x, self.w)
+        outcome = out.tolist()
+        final_outcome = toTensor(x=outcome)
+        return final_outcome
+    
+"""
+    this class implements a list of layers that is given as list_of_layer
+    the parameter list_of_layer contains the output produced by each layer 
+    for example first element represents the number of column generated by first layer. similarly for each elements.
+    A dense networks has no its own weigths and bias but each layer contained has its own weights and biases
+    this class is a general representation of multi layer perceptron or a dense layer defined in Tensorflow!
 
-    """
-    def __call__(self, x):
-        outcome = []
-        for node in self.nodes:
-            val = node(x)
-            outcome.extend(val)
-        out = np.array(object=outcome)
-        if self.n_outs == 1:
-            out = out.reshape(len(x),)
-        else:
-            out = out.reshape(len(x),self.n_outs) 
-            return out.tolist()
-         # output column must be same as n_outs and number of columns in input must be same as n_input than reshaping will happen correctly otherwise error will be raised!
-        return out.tolist()
-        
-       
-        
-
-        
+"""
 class Dense(Module):
 
-    def __init__(self, n_input, list_layers:list):
+    def __init__(self, n_input:int , list_of_layer:list) -> None:
+        self.n_input = n_input
+        self.w = None
+        self.b = None
+        layer_segment = [self.n_input] + list_of_layer
+        self.layers = [Layer(layer_segment[i], layer_segment[i+1]) for i in range(len(list_of_layer))]
 
-        total_size = [n_input] + list_layers
-        self.layers = [Layer(total_size[i], total_size[i+1]) for i in range(len(list_layers))]
-        
+
+    def __repr__(self) -> str:
+        return f"Dense [{', '.join(str(layer) for layer in self.layers)}]"
+    
+    def __call__(self , x):
+        # exploring each layer output one previous layer is input for current layer
+        for layer in self.layers:
+            
+            out = layer(x=x)
+            # out is the list of list of tensor class now we have to change it to numpy so that this can be feeded to the next layer 
+
+            input_list = tonumpy(x=out)
+            x = np.array(object=input_list)
+           
+        return toTensor(x=x.tolist())
+    
     def parameters(self):
-        self.params = []
+        params = []
         for layer in self.layers:
-            self.params.extend(layer.parameters())
-        return self.params        # returning a list of weights and bias 
-    
-
-    def __repr__(self):
-        return f"Dense of [{', '.join(str(layer) for layer in self.layers)}]"
-    
-
-    def __call__(self, x):
-        # calling each layer 
-        outcome = []
-        cnt = 0
-        for layer in self.layers:
-            
-            x = layer(x=x)
-            
-        return x
-
-
-    
-
-
+            params.extend(layer.parameters())
+        return params

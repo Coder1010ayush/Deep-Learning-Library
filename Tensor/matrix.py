@@ -377,8 +377,8 @@ class Tensor:
         N = self.data.flatten().shape[0]
         loss = Tensor(value=np.mean( np.square ( self.data - other.data )  ),operation="mse",subset=(self,other) )
         def _backward():
-            self.grad += (2 * (self.data - other.data) ) / N
-            other.grad += (2 * (other.data - self.data)) / N
+            self.grad = (2 * (self.data - other.data) ) / N
+            other.grad = (2 * (other.data - self.data)) / N
         loss._backward = _backward
         return loss
     
