@@ -35,6 +35,31 @@ and there is a single bias assosiated to this node.
 this will use in a single Layer formation
 
 """
+
+def toTensor(x:list):
+    loc = []
+    for i in x:
+        if isinstance(i , list):
+            loc.append(toTensor(i))
+        else:
+            t = Tensor(value=i)
+            loc.append(t)
+    return loc
+
+def tonumpy(x:list):
+        loc = []
+        for item in x:
+            if isinstance(item , list):
+                loc.append(tonumpy(item))
+            else:
+                loc.append(item.data)
+        if len(loc) == 1:
+            return loc[0]
+        return loc
+    
+
+
+
 class Node(Module):
 
     def __init__(self,n_input) -> None:
@@ -53,10 +78,13 @@ class Node(Module):
     
     def __call__(self,x):
         out = np.dot(x , self.w) + self.bias
-        return out
+        outcome  = out.flatten().tolist()
+        outcome = toTensor(x=outcome)
+        
+        return outcome
     
     def parameters(self):
-        return self.w.flatten().tolist() + [self.bias]
+        return toTensor(self.w.flatten().tolist()) + [self.bias]
     
 
 """
@@ -83,11 +111,13 @@ class Layer(Module):
         params = []
         w = self.w.flatten().tolist()
         b = self.bias.tolist()
-        return w + b
+        return toTensor(w) + toTensor(b)
     
     def __call__(self,x):
         out = np.dot(x, self.w)
-        return out
+        outcome = out.tolist()
+        final_outcome = toTensor(x=outcome)
+        return final_outcome
     
 """
     this class implements a list of layers that is given as list_of_layer
@@ -114,10 +144,13 @@ class Dense(Module):
         # exploring each layer output one previous layer is input for current layer
         for layer in self.layers:
             
-            x = layer(x=x)
-           # print('shape of x is ', x.shape)
+            out = layer(x=x)
+            # out is the list of list of tensor class now we have to change it to numpy so that this can be feeded to the next layer 
 
-        return x
+            input_list = tonumpy(x=out)
+            x = np.array(object=input_list)
+           
+        return toTensor(x=x.tolist())
     
     def parameters(self):
         params = []
