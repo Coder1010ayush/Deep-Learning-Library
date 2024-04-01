@@ -29,10 +29,25 @@ class Tensor:
             # this means value is list 
             self.data = np.array(object=value,dtype=float)
         self.sign = operation
-        self.grad = np.zeros_like(self.data)
+        self.grad = np.full_like(self.data,0.001)
         self._backward = lambda : None
         self.children = set(subset)
         self.id = id(self)
+
+    def backward(self):  # this function is the base function which generate computational graph for each node or tensor
+        graph_nodes = []
+        visited = set()
+        def build_graph(v):
+            if v not in visited:
+                visited.add(v)
+                for child in v.children:
+                    build_graph(child)
+                graph_nodes.append(v)
+        build_graph(self)
+        self.grad = np.ones_like(self.data)
+        # print(graph_nodes)
+        for v in reversed(graph_nodes):
+            v._backward()
 
     def shape(self):
         # print( f"TensorSize{(self.data).shape}")
@@ -57,8 +72,8 @@ class Tensor:
             out = Tensor(np.add(self.data,other.data),subset=(self,other),operation="add")
 
         def _backward():
-            self.grad = out.grad * np.ones_like(self.data)
-            other.grad = out.grad * np.ones_like(other.data)
+            self.grad += out.grad * np.ones_like(self.data)
+            other.grad += out.grad * np.ones_like(other.data)
 
         out._backward = _backward
         return out
@@ -75,8 +90,8 @@ class Tensor:
             out = Tensor(value=np.dot(self.data,other.data),subset=(self, other),operation="mul")
 
         def _backward():
-            self.grad = np.dot(out.grad, other.data.T) # chain rule
-            other.grad = np.dot(self.data.T ,out.grad) # chain rule
+            self.grad += np.dot(out.grad, other.data.T) # chain rule
+            other.grad += np.dot(self.data.T ,out.grad) # chain rule
 
         out._backward = _backward
         return out
@@ -123,20 +138,6 @@ class Tensor:
     def __rtruediv__(self,other):
         return other * (self**-1)
 
-    def backward(self):  # this function is the base function which generate computational graph for each node or tensor
-        graph_nodes = []
-        visited = set()
-        def build_graph(v):
-            if v not in visited:
-                visited.add(v)
-                for child in v.children:
-                    build_graph(child)
-                graph_nodes.append(v)
-        build_graph(self)
-        self.grad = np.ones_like(self.data)
-        # print(graph_nodes)
-        for v in reversed(graph_nodes):
-            v._backward()
 
     def visualize_graph(self, filename='computation_graph'):
         dot = Digraph()
