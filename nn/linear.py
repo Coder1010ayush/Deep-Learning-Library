@@ -36,6 +36,7 @@ this will use in a single Layer formation
 
 """
 
+# this function convert any nested list into tensor matrix
 def toTensor(x:list):
     loc = []
     for i in x:
@@ -45,7 +46,7 @@ def toTensor(x:list):
             t = Tensor(value=i)
             loc.append(t)
     return loc
-
+# this function is reverse of toTensor function
 def tonumpy(x:list):
         loc = []
         for item in x:
