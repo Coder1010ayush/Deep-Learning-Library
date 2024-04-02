@@ -284,27 +284,84 @@ if __name__ == '__main__':
     # params = node.parameters()
     # print('parameters are : ', params)
 
-    data = np.random.random(size=(10,10)).tolist()
+    # data = np.random.random(size=(10,10)).tolist()
     # inputs = [list(map(Tensor, xrow)) for xrow in data]
     #node = Layer(n_input=10,n_out=5)
-    node = Dense(n_input=10 , list_of_layer=[10,15,1])
+    # node = Dense(n_input=10 , list_of_layer=[10,15,1])
    # node = Node(n_input=10)
-    out = node(x=data)
-    print('out is : ', out)
-    print(len(out))
-    params = node.parameters()
-    print('parameters are : ', len(params))
+    # out = node(x=data)
+    # print('out is : ', out)
+    # print(len(out))
+    # params = node.parameters()
+    # print('parameters are : ', len(params))
     # print('params are ', params)
     
+    arr1 = [
+        [1.2 , 1.3, 1.4],
+        [2.3, 4.5, 5.6],
+        [12.3, 14.5, 15.6]
+    ]
+
+    arr2 = [
+        [7.2 , 1.3, 1.4,5.6],
+        [2.3, 13.4, 5.6,7.9],
+        [8.1, 6.1, 5.5,8.1]
+    ]
+
+    arr3 = [
+        [1.2 , 1.3, 13.4,2.3],
+        [7.3, 2.5, 5.6,6.7],
+        [4.1, 5.1, 12.5,5.6],
+        [11.2,23.2,1.3,2.4]
+    ]
+
+    arr4 = [
+        [1.7 , 1.13, 7.4,4.5],
+        [2.5, 4.8, 9.6,5.5],
+        [3.0, 4.8, 8.5,6.5]
+    ]
 
 
+    obj1 = torch.tensor(data=arr1,requires_grad=True)
+    obj2 = torch.tensor(data=arr2,requires_grad=True)
+    obj3 = torch.tensor(data=arr3,requires_grad=True)
+    obj4 = torch.tensor(data=arr4,requires_grad=True)
 
+    out1 = torch.matmul(obj1 , obj2)
+    out2 = torch.matmul(obj4 , obj3)
+    out1.retain_grad()
+    out2.retain_grad()
+
+    out = out1 + out2
+    out.retain_grad()
+    loss = torch.mean(input=out)
+    loss.retain_grad()
+    loss.backward()
+
+    print('out is ', out)
+    print('loss is ', loss)
+    print('out1 is ' ,out1)
+    print('out2 is ' , out2)
     
+    print()
+    print()
+    print()
 
-    
+    print('arr1 grad is ', obj1.grad)
+    print('arr2 grad is ', obj2.grad)
+    print('arr3 grad is ', obj3.grad)
+    print('arr4 grad is ', obj4.grad)
 
-                  
+
+    print()
+    print()
+    print()
+
+    print('out1 grad is ', out1.grad)
+    print('out2 grad is ', out2.grad)
+    print('out grad is ', out.grad)
+    print('loss grad is ', loss.grad)
 
 
 
-    
+
