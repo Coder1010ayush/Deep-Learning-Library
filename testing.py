@@ -1,8 +1,8 @@
 import os
 import sys
 import numpy as np
-import json
-from Tensor.matrix import Tensor
+# import json
+# from Tensor.matrix import Tensor
 from nn.cnn import conv
 from nn.linear import Node , Layer , Dense
 from nn.pooling_single_channel import MaxPool, MinPool , AveragePool
@@ -194,8 +194,72 @@ def testing_autograd_for_linear_layer():
     print('grad of y_pred is ', y_pred.grad)
     y_pred.visualize_graph(filename="linear")
 
-
 import torch
+from Tensor.tensor import Tensor 
+from Tensor.tensor import visualize_graph as vz
+from activation.activation import relu,tanh,selu,gelu
+def testing_addition_subtracton_auto_diff():
+    # result of custom tensor class and torch auto diff must be same or very close to each-other 
+    # let us start 
+
+    #case one : with same shape 
+    
+    arr1 = np.array(object= [ [1.9,1.5,1.6],[12.2,9.26,6.7], [2.5,2.7,2.9] ]  )
+    arr2 = np.array(object= [ [1.9,7.5,1.6],[7.2,6.16,6.7], [2.5,2.7,2.9] ]  )
+    arr3 = np.array(object= [ [1.8,10.5,9.6],[11.2,6.6,6.7], [2.5,2.7,2.9] ]  )
+    obj1 = Tensor(value=arr1) 
+    obj2 = Tensor(value=arr2)
+    obj3 = Tensor(value=arr3)
+
+    # performing operation and calculating gradient using custom autograd and than checking with pytroch
+    out1 = obj1 * obj2 
+    out2 = out1 * obj3
+    
+    out = out2.mean()
+    out.backward()
+    vz(self=out,filename='testing/summaton_testing')
+    with open(file='testing/summation.txt',mode="w") as file:
+        file.write(f'obj1 is {obj1}\n')
+        file.write(f'obj2 is {obj2}\n')
+        file.write(f'obj3 is {obj3}\n')
+        file.write(f'out is {out}\n')
+
+        file.write(f'grad of obj1 is {obj1.grad}\n\n')
+        file.write(f'grad of obj2 is {obj2.grad}\n\n')
+        file.write(f'grad of obj3 is {obj3.grad}\n\n')
+        file.write(f'grad of out1 is {out1.grad}\n\n')
+        file.write(f'grad of out2 is {out2.grad}\n\n')
+        file.write(f'grad of out is   {out.grad}\n\n')
+
+
+    obj1 = torch.tensor(data= arr1,requires_grad=True)
+    obj2 = torch.tensor(data = arr2,requires_grad=True)
+    obj3 = torch.tensor(data= arr3,requires_grad=True)
+
+    out1 = torch.matmul(obj1 , obj2)
+    out1.retain_grad()
+    out2 = torch.matmul(out1 , obj3)
+    out2.retain_grad()
+    out = out2.mean()
+    out.retain_grad()
+    out.backward()
+
+    with open(file='testing/summation_torch.txt',mode="w") as file:
+        file.write(f'obj1 is {obj1}\n')
+        file.write(f'obj2 is {obj2}\n')
+        file.write(f'obj3 is {obj3}\n')
+        file.write(f'out is {out}\n')
+
+        file.write(f'grad of obj1 is {obj1.grad}\n\n')
+        file.write(f'grad of obj2 is {obj2.grad}\n\n')
+        file.write(f'grad of obj3 is {obj3.grad}\n\n')
+        file.write(f'grad of out1 is {out1.grad}\n\n')
+        file.write(f'grad of out2 is {out2.grad}\n\n')
+        file.write(f'grad of out is   {out.grad}\n\n')
+
+    #case two : with different shape
+    #case three : with different dtypes such as scalar with vector and vector with matrix and matric to matrix
+
 if __name__ == '__main__':
     # test_node()
     # test_linear_layers()
@@ -338,30 +402,30 @@ if __name__ == '__main__':
     loss.retain_grad()
     loss.backward()
 
-    print('out is ', out)
-    print('loss is ', loss)
-    print('out1 is ' ,out1)
-    print('out2 is ' , out2)
+    # print('out is ', out)
+    # print('loss is ', loss)
+    # print('out1 is ' ,out1)
+    # print('out2 is ' , out2)
     
-    print()
-    print()
-    print()
+    # print()
+    # print()
+    # print()
 
-    print('arr1 grad is ', obj1.grad)
-    print('arr2 grad is ', obj2.grad)
-    print('arr3 grad is ', obj3.grad)
-    print('arr4 grad is ', obj4.grad)
-
-
-    print()
-    print()
-    print()
-
-    print('out1 grad is ', out1.grad)
-    print('out2 grad is ', out2.grad)
-    print('out grad is ', out.grad)
-    print('loss grad is ', loss.grad)
+    # print('arr1 grad is ', obj1.grad)
+    # print('arr2 grad is ', obj2.grad)
+    # print('arr3 grad is ', obj3.grad)
+    # print('arr4 grad is ', obj4.grad)
 
 
+    # print()
+    # print()
+    # print()
 
+    # print('out1 grad is ', out1.grad)
+    # print('out2 grad is ', out2.grad)
+    # print('out grad is ', out.grad)
+    # print('loss grad is ', loss.grad)
+
+
+    testing_addition_subtracton_auto_diff()
 

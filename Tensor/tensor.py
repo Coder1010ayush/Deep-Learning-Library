@@ -105,7 +105,7 @@ class Tensor:
 
     
     def __repr__(self) -> str:
-        return f"Tensor({self.data},grad :{self.grad})"
+        return f"tensor({self.data},grad :{self.grad})"
     
     def __add__(self , other):
         out = None
@@ -370,6 +370,10 @@ class Tensor:
             raise ValueError("unsupported data type is encountered!")
 
         return outcome
+    
+    def __pow__(self , other):
+        pass
+    
 
     def __radd__(self , other):
         return self + other
