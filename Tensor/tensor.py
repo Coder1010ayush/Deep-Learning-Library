@@ -331,6 +331,7 @@ class Tensor:
         else:
             raise ValueError("unsupported data type is encourted!")
         return outcome
+    
     """
         this is an element wise division so shape must be shape
     

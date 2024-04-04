@@ -293,3 +293,15 @@ def elu(self,alpha=0.001):  # implementing backpropogation for elu activation fu
              raise ValueError("unsupported data type is encountered!")
         outcome._backward = _backward
         return outcome
+
+"""
+    Below it all the loss funcition would be implemented 
+        01. MSE Loss function
+        02. Softmax Loss function
+        03. Binary Cross Entropy Loss function
+        04. Categorical Cross Entropy Loss function
+        05. Hubour's Loss function
+        06. RMSE
+
+"""
+
