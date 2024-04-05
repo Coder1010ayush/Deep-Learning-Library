@@ -37,9 +37,9 @@ class LinearRegression:
 model = LinearRegression(input_size=1, output_size=1)
 
 # Generate some random data
-X = np.random.randn(1000, 1)
+X = np.random.randn(5000, 1)
 X.dtype = float
-y = 3 * X + 2 + np.random.randn(1000, 1) * 0.1  # Linear relationship with some noise
+y = 3 * X + 2 + np.random.randn(5000, 1) * 0.1  # Linear relationship with some noise
 y.dtype = float
 # Convert data to custom tensor class
 X_tensor = Tensor(value=X)
@@ -48,7 +48,7 @@ print(X_tensor.data.shape)
 print(y_tensor.data.shape)
 # Training loop
 learning_rate = 0.01
-for epoch in range(120):
+for epoch in range(70):
     # Forward pass
     predictions = model.forward(inputs=X_tensor)
     loss = model.mse_loss(predictions, y_tensor)
