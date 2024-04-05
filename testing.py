@@ -160,4 +160,35 @@ def testing_sigmoid_function():
 
 
 if __name__ == '__main__':
-    pass
+    # setting up a linear layer from skretch
+
+    # let us assume we a data of 2 columns and 10 rows in which we have 1 column is a input vector feature and 1 column vector is a outcome vector
+    # weight and bias will be defined 
+
+    x = Tensor(value=np.random.random(size=(10 , 1)))
+    y = Tensor(value=np.random.random(size=(10)))
+    weights = Tensor(value=np.random.random(size=(1,1)))
+    bias = Tensor(value=np.random.random(size=(1,1))[0][0])
+    
+    out1 = x*  weights
+    out = out1 + bias
+    final_out = out.mean()
+    print(final_out)
+    final_out.backward()
+    vz(self=final_out, filename="testing/linear")
+    
+    weights.data -= 0.1 * weights.grad
+    bias.data -= 0.1 * bias.grad
+    out1 = x*  weights
+    out = out1 + bias
+    final_out = out.mean()
+    print(final_out)
+    final_out.backward()
+
+    weights.data -= 0.1 * weights.grad
+    bias.data -= 0.1 * bias.grad
+    out1 = x*  weights
+    out = out1 + bias
+    final_out = out.mean()
+    print(final_out)
+    final_out.backward()

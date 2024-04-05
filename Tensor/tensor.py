@@ -128,6 +128,9 @@ class Tensor:
                 self.grad += out.grad * self.data
                 other.grad += out.grad * other.data
             else:      
+                # print('shape is ', self.data.shape)
+                # print('shape is ', other.data.shape)
+                # print('shape is ', out.grad.shape)
                 self.grad += (out.grad * np.ones_like(self.data))
                 other.grad += (out.grad * np.ones_like(other.data))
 
@@ -161,13 +164,13 @@ class Tensor:
             vec = None
             interediate_result1 = None
             intermediate_result2 = None
-            vec = out.grad
-            if isinstance(vec , (int , float)):
-                pass
+            vac = out.grad
+            if isinstance(vac , (int , float)):
+                vec = vac
             else:
-                vec = vec.T
+                vec = vac.T
             interediate_result1 = np.dot(other.data , vec)
-            intermediate_result2 = np.dot(vec , self.data.T)
+            intermediate_result2 = np.dot(vec , self.data)
 
             if isinstance(interediate_result1 , (int , float)):
                 pass
@@ -443,7 +446,7 @@ class Tensor:
         return self + other
     
     def __neg__(self):
-        return self * -1
+        return self * Tensor(value=-1)
     
     def __sub__(self, other):
         return self + (-other)
