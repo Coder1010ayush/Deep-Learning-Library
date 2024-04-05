@@ -3,7 +3,7 @@
     3 color channels rgb image data.
 
 """
-from Tensor.matrix import Tensor
+from Tensor.tensor import Tensor
 import os
 import sys
 import pathlib

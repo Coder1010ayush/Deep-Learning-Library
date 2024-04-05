@@ -11,7 +11,7 @@ import numpy as np
 import scipy as sc
 import os
 import sys
-from Tensor.matrix import Tensor
+from Tensor.tensor import Tensor
 from Tensor.utility import visualize_graph
 
 class MaxPool:

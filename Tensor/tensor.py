@@ -154,10 +154,34 @@ class Tensor:
         elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
             out = Tensor(value=np.matmul(self.data , other.data),subset=(self,other),operation="Backward<Matmul>")
 
+        else:
+            raise NotImplemented()
+
         def _backward():
-            self.grad += np.dot(other.data, out.grad.T).T
-            other.grad += np.dot(out.grad.T , self.data).T
-        
+            vec = None
+            interediate_result1 = None
+            intermediate_result2 = None
+            vec = out.grad
+            if isinstance(vec , (int , float)):
+                pass
+            else:
+                vec = vec.T
+            interediate_result1 = np.dot(other.data , vec)
+            intermediate_result2 = np.dot(vec , self.data.T)
+
+            if isinstance(interediate_result1 , (int , float)):
+                pass
+            else:
+                interediate_result1 = interediate_result1.T
+
+            if isinstance(intermediate_result2 , (int , float)):
+                pass
+            else:
+                intermediate_result2 = intermediate_result2.T
+
+
+            self.grad += interediate_result1
+            other.grad += intermediate_result2
         out._backward = _backward
         return out
     
@@ -387,7 +411,7 @@ class Tensor:
         outcome = None
         # setting up backpropogation for the self 
         def _backward():
-            self.grad += other * (self.data ** (other.data - 1)) * outcome.grad
+            self.grad += other.data * (self.data ** (other.data - 1)) * outcome.grad
 
 
         if isinstance(self.data , (int , float)):

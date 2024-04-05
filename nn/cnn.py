@@ -4,7 +4,7 @@
 """
 import os
 import sys
-from Tensor.matrix import Tensor
+from Tensor.tensor import Tensor
 from Tensor.utility import visualize_graph
 import torch
 from torch import nn

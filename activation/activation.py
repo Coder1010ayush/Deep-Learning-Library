@@ -217,7 +217,7 @@ def selu(self):
             f'(x) = {
 
                     derivative =    scale (1 + alpha * exp(x) )     if x >= 0 
-                    derivative = scale (0 + 0 ) => 0                if x < 0
+                    derivative =    scale (0 + 0 ) => 0                if x < 0
 
                     }
     """

@@ -11,7 +11,7 @@
 import os
 import sys
 import pathlib
-from Tensor.matrix import Tensor
+from Tensor.tensor import Tensor
 import math
 import numpy as np
 

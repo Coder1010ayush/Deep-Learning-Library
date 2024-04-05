@@ -9,7 +9,7 @@
 import numpy as np
 import os
 import sys
-from Tensor.matrix import Tensor
+from Tensor.tensor import Tensor
 from initializer.xavier import Hei,Xavier
 
 """

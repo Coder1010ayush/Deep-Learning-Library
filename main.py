@@ -246,7 +246,7 @@ res = np.dot(arr1,arr2)
 print(res)
 print(res.shape)
 import numpy as np
-from Tensor.matrix import Tensor
+from Tensor.tensor import Tensor
 arr1 = Tensor(value=np.random.random(size=(4,3)))
 arr2 = Tensor(value=np.random.random(size=(3,4)))
 
