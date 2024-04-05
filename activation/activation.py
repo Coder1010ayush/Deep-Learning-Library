@@ -23,7 +23,7 @@ def relu(self):
                 f(x)>= 0 : f(x)
                 f(x) <0 : 0
 
-                derivation is as below:
+            derivation is as below:
                 if f'(x) = 1 , if f(x) >= 0
                 else f'(x) = 0 , if f(x) < 0
         

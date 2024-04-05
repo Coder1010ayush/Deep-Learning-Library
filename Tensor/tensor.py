@@ -373,8 +373,47 @@ class Tensor:
         return outcome
     
     def __pow__(self , other):
-        pass
-    
+        """
+             implementing the power function for tensor and establish the chaining process of backpropoogation 
+             for scalar tensor as well as matrix tensor als0.
+             mathematical formulation is :
+                f(x) = x(n)  () => this represents the power 
+             derivative of this funciton is :
+                f'(x) = n*x(n-1)
+        """
+        if isinstance(other , (int , float)):
+            other = Tensor(value= other)
+
+        outcome = None
+        # setting up backpropogation for the self 
+        def _backward():
+            self.grad += other * (self.data ** (other.data - 1)) * outcome.grad
+
+
+        if isinstance(self.data , (int , float)):
+            if isinstance(other.data , (int , float)):
+                outcome = Tensor(value=self.data ** other.data , operation="Backward<pow>", subset=(self, ))
+
+            else:
+                raise NotImplemented()
+            outcome._backward = _backward
+            
+        elif isinstance(self.data , np.ndarray):
+            """
+                this supports only element wise power not matrix to matrix multiplication
+                this is for fast and effieciency.
+            """
+            if isinstance(other.data , (int , float)):
+                outcome = Tensor(value= self.data ** other.data , operation="Backward<pow>" , subset=(self,))
+            else:
+                raise NotImplemented()
+            outcome._backward  = _backward
+
+        else:
+            raise ValueError("unsupported data type is encountered!")
+        return outcome
+
+
 
     def __radd__(self , other):
         return self + other
