@@ -107,32 +107,38 @@ class Tensor:
     def __repr__(self) -> str:
         return f"tensor({self.data},grad :{self.grad})"
     
-    def __add__(self , other):
-        out = None
-        if isinstance(other , (int,float)) and isinstance(self.data , (int , float)):
-            other = Tensor(value=other)
-            out = Tensor(self.data + other.data,subset=(self, other), operation="Backward<Add>")
+    
 
-        elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
-            out = Tensor(value=np.add(self.data , other.data), subset=(self,other),operation="Backward<Add>")
-        
-        elif isinstance(self.data , np.ndarray) and isinstance(other.data , (int , float)):
-            other.data = np.full_like(self.data,fill_value=other.data)
-            out = Tensor(self.data + other.data,subset=(self, other),operation="Backward<Add>")
+    def __add__(self, other):
+        # Convert other to a Tensor if it's a scalar
+        if isinstance(other, (int, float)):
+            other = Tensor(other)
+
+        # Perform the addition based on the types of self.data and other.data
+        if isinstance(self.data, np.ndarray) and isinstance(other.data, np.ndarray):
+            out_data = np.add(self.data, other.data)
+
+        elif isinstance(self.data, np.ndarray) and isinstance(other.data, (int, float)):
+            out_data = self.data + other.data
 
         else:
-            out = Tensor(value=self.data+other.data,operation="Backward<Add>",subset=(self, other))
-        
+            out_data = self.data + other.data
+
+        # Create the output Tensor
+        out = Tensor(out_data, subset=(self, other), operation="Backward<Add>")
+
+        # Define the backward function
         def _backward():
-            if isinstance(out.data, (int , float) ):
-                self.grad += out.grad * self.data
-                other.grad += out.grad * other.data
-            else:      
-                # print('shape is ', self.data.shape)
-                # print('shape is ', other.data.shape)
-                # print('shape is ', out.grad.shape)
-                self.grad += (out.grad * np.ones_like(self.data))
-                other.grad += (out.grad * np.ones_like(other.data))
+            if isinstance(self.data, np.ndarray) and isinstance(other.data, np.ndarray):
+                self.grad += np.ones_like(self.data) * out.grad
+                other.grad += np.ones_like(other.data) * out.grad
+            elif isinstance(self.data, np.ndarray) and isinstance(other.data , (int , float)): 
+                self.grad += np.ones_like(self.data) * out.grad
+                other.grad += np.dot(out.grad.T, np.ones_like(out.grad))[0][0]
+                
+            else:
+                self.grad += out.grad
+                other.grad += out.grad
 
         out._backward = _backward
         return out

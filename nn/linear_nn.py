@@ -15,7 +15,7 @@ import numpy as np
 import pathlib
 from activation.activation import relu, leaky_relu, tanh , sigmoid, gelu , selu
 from initializer.xavier import Hei , LeCun , Xavier
-
+import math
 
 # batched data into row and column data 
 def flatten(data):
@@ -98,14 +98,20 @@ class Node(Module):
 """
 class Linear(Module):
 
-    def __init__(self, in_feature:int = None , out_feature:int = None) -> None:
+    def __init__(self, in_feature:int = None , out_feature:int = None,learning_rate=0.01,decay_rate=0.1) -> None:
         self.in_feature = in_feature
         self.out_feature = out_feature
         # here intitialization of weights will be done on the basis of xavier rules
-        hei = Xavier(n_in=self.in_feature , n_out=self.out_feature,uniform=True)
+        hei = Xavier(n_in=self.in_feature , n_out=self.out_feature,uniform=False)
         self.weights = hei.initialize(shape=(self.in_feature, self.out_feature))
         # bias is choosen randomly anything using numpy random function 
-        self.bias = Tensor(value=np.random.random(size=(1,1))[0][0] )
+        self.bias = Tensor(value=0.0)
+        self.learning_rate = learning_rate
+        self.decay_rate = decay_rate
+        self.best_loss = np.inf
+        self.patience = 3  # Number of epochs to wait before early stopping
+        self.wait = 0
+
 
 
     def __repr__(self) -> str:
@@ -125,12 +131,9 @@ class Linear(Module):
         shape.append(self.out_feature)
         if len(x.data.shape) != 2:
             x = Tensor(value=np.array(flatten(data=x.data)) )
-        # print(x.data.shape)
-        # print(self.weights.data.shape)
-        # x = Tensor(value=x.data.T)
-        out = x * self.weights  + self.bias
-        final_out = Tensor(value=out.data.reshape(shape))
-        return out,final_out
+        
+        out =( x * self.weights  ) + self.bias
+        return out 
     
     def mse_loss(self, predictions, targets):
         # Mean Squared Error Loss
@@ -142,7 +145,33 @@ class Linear(Module):
         # Backward pass to compute gradients
         loss.backward()
     
-    def update_parameters(self, learning_rate):
+    def update_parameters(self, learning_rate,epoch):
         # Update weights and biases using gradients
         self.weights.data -= learning_rate * self.weights.grad
+        #print('bias is ', self.bias)
         self.bias.data -= learning_rate * self.bias.grad
+        self.learning_rate *= (1. / (1. + self.decay_rate * epoch))  # Learning rate decay
+
+
+    # def check_early_stopping(self, validation_loss):
+    #     if validation_loss < self.best_loss:
+    #         self.best_loss = validation_loss
+    #         self.wait = 0
+    #     else:
+    #         self.wait += 1
+    #         if self.wait >= self.patience:
+    #             return True  # Stop training
+    #     return False  # Continue training
+
+
+    
+    def info(self):
+        info_dict = {
+            "in_feature": self.in_feature,
+            "out_feature": self.out_feature,
+            "weights": self.weights,
+            "bias": self.bias,
+            "learning_rate": self.learning_rate,
+            "decay_rate": self.decay_rate
+        }
+        return info_dict
