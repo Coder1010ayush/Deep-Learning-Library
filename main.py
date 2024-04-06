@@ -41,7 +41,8 @@ for epoch in range(epochs):
         layer.update_parameters(learning_rate=learning_rate, epoch=epoch)
     
    # grad_output = model.backward(loss=loss)
-   # model.zero_grad()  # Reset gradients for next pass
+    # it is not necessary to use model.zero_grad() , but preserve due to pytorch 
+    model.zero_grad()  # Reset gradients for next pass
     
     # Print the loss
     if epoch % 1 == 0:

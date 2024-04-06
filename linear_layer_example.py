@@ -46,7 +46,7 @@ list_result = []
 x_train = Tensor(value=x_train)
 y_train = Tensor(value=y_train)
 
-learning_rate = 0.0001
+learning_rate = 0.01
 epochs = 50
 for epoch in range(0, epochs):
 
