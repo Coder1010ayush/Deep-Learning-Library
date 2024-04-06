@@ -146,6 +146,8 @@ class Linear(Module):
         loss.backward()
     
     def update_parameters(self, learning_rate,epoch):
+        self.weights.grad = np.clip(self.weights.grad, -1, 1)
+        self.bias.grad = np.clip(self.bias.grad, -1, 1)
         # Update weights and biases using gradients
         self.weights.data -= learning_rate * self.weights.grad
         #print('bias is ', self.bias)

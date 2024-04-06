@@ -27,23 +27,21 @@ target = Tensor(value=target)
 
 
 
-epochs = 10
+epochs = 100
 learning_rate = 0.01
 for epoch in range(epochs):
     # Forward pass
     predictions = model(data)
     loss = model.mse_loss(predictions, target)
     # Backward pass
-    grad_output = model.backward(loss=loss)
-    model.zero_grad()  # Reset gradients for next pass
-
-    out = sigmoid(self=loss)
+    out = relu(self=loss)
     out.backward()
-    
     # Update parameters
     for layer in model.layers:
         layer.update_parameters(learning_rate=learning_rate, epoch=epoch)
     
+   # grad_output = model.backward(loss=loss)
+   # model.zero_grad()  # Reset gradients for next pass
     
     # Print the loss
     if epoch % 1 == 0:

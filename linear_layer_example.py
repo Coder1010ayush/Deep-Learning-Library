@@ -55,7 +55,7 @@ for epoch in range(0, epochs):
     list_result.append(loss.data)
     layer.backward(loss=loss)
     layer.update_parameters(learning_rate=learning_rate,epoch=epochs)
-    # Check for early stopping
+  #d  Check for early stopping
     if loss.data < layer.best_loss:
         best_loss = loss.data
         wait = 0
