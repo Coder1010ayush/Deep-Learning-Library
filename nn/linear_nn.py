@@ -175,3 +175,74 @@ class Linear(Module):
             "decay_rate": self.decay_rate
         }
         return info_dict
+
+    def zero_grad(self):
+        self.weights.grad = 0.0
+        self.bias.grad = 0.0
+    
+
+"""
+    implementing a dense network of containing a list of single linear layer 
+
+"""
+class Sequential:
+
+    def __init__(self, list_of_layers:list = []) -> None:
+        """
+            list_of_layers would be in the form of a list of the tuple in which each tuple
+            contain two elements in which first element is the in_feature and second element of 
+            the tuple is the out_feature of that layer.
+
+        """
+        self.number_of_layers = len(list_of_layers)
+        self.list_of_layers = list_of_layers
+        self.layers = []
+        # creating a list of layers according to the given list
+        for i in list_of_layers:
+            in_feature = i[0]
+            out_feature = i[1]
+            layer = Linear(in_feature=in_feature , out_feature=out_feature)
+            self.layers.append(layer)
+
+
+    # way of showing how the model looks like 
+    def __repr__(self) -> str:
+        string = []
+        for i in self.list_of_layers:
+            str1 = "Linear"+str(i)
+            string.append(str1)
+
+        pretty_str = "("
+
+        for i in string:
+            pretty_str += "\n"+"   "+i
+
+        pretty_str += "\n" + ")"
+        return pretty_str
+    
+
+    def __call__(self , x):
+        out = None
+        for layer in self.layers:
+            x = layer(x)
+        return x
+
+    def mse_loss(self, predictions, targets):
+        # Mean Squared Error Loss
+        diff = predictions - targets
+        val =  (diff.square().sum())
+        return val
+    
+    def backward(self, loss):
+        # Backward pass to compute gradients
+        loss.backward()
+
+    
+    def parameters(self):
+        for layer in self.layers:
+            yield from layer.parameters()
+
+    def zero_grad(self):
+        for layer in self.layers:
+            layer.zero_grad()
+

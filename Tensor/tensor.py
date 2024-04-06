@@ -10,7 +10,7 @@ import numpy as np
 import sys
 import pathlib 
 import math
-# from initializer.xavier import Hei , Xavier ,LeCun
+#from initializer.xavier import Hei , Xavier ,LeCun
 
 def visualize_graph(self, filename='computation_graph'):
         dot = Digraph()
@@ -132,6 +132,7 @@ class Tensor:
             if isinstance(self.data, np.ndarray) and isinstance(other.data, np.ndarray):
                 self.grad += np.ones_like(self.data) * out.grad
                 other.grad += np.ones_like(other.data) * out.grad
+
             elif isinstance(self.data, np.ndarray) and isinstance(other.data , (int , float)): 
                 self.grad += np.ones_like(self.data) * out.grad
                 other.grad += np.dot(out.grad.T, np.ones_like(out.grad))[0][0]
@@ -161,6 +162,8 @@ class Tensor:
             return out # need to review 
         
         elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
+            # print('self data shape ',self.data.shape)
+            # print('other data shape ',other.data.shape)
             out = Tensor(value=np.matmul(self.data , other.data),subset=(self,other),operation="Backward<Matmul>")
 
         else:
@@ -482,8 +485,13 @@ class Tensor:
             v._backward()
 
 
+#note 
+"""
+    All the activation function is implemented in activation/activation.py instead of here
 
+"""
 if __name__ == '__main__':
+
     print('let us start!')
     # taking an example and verified using pytorch autograd 
     arr1 = [

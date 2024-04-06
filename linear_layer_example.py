@@ -40,6 +40,7 @@ print()
 
 # building a layer
 layer = Linear(in_feature=1, out_feature=1)
+layer1 = Linear(in_feature=10 , out_feature=1)
 print(layer)
 list_result = []
 x_train = Tensor(value=x_train)
