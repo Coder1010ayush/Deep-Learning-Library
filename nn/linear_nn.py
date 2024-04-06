@@ -132,8 +132,8 @@ class Linear(Module):
         if len(x.data.shape) != 2:
             x = Tensor(value=np.array(flatten(data=x.data)) )
         
-        out =( x * self.weights  ) + self.bias
-        return out 
+        out = ( x * self.weights  ) + self.bias 
+        return out
     
     def mse_loss(self, predictions, targets):
         # Mean Squared Error Loss
