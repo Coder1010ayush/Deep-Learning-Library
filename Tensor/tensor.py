@@ -538,5 +538,3 @@ if __name__ == '__main__':
     mini = Tensor(value=np.random.random(size= (10 , 10)))
     val = maxi / mini
     print(val)
-
-

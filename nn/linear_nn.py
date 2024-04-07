@@ -137,6 +137,11 @@ class Linear(Module):
     
     def mse_loss(self, predictions, targets):
         # Mean Squared Error Loss
+        shape = list(targets.data.shape)
+        shape = shape[0:-1]
+        shape.append(self.out_feature)
+        if len(targets.data.shape) != 2:
+            targets = Tensor(value=np.array(flatten(data=targets.data)) )
         diff = predictions - targets
         val =  (diff.square().sum())
         return val
