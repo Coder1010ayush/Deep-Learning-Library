@@ -133,7 +133,7 @@ class Linear(Module):
             x = Tensor(value=x.data.reshape(-1,1)) 
             
         
-        out = ( x * self.weights  ) + self.bias 
+        out = ( x.mat_mul(self.weights)  ) + self.bias 
         return out
     
     def mse_loss(self, predictions, targets):

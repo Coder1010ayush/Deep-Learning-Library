@@ -139,16 +139,18 @@ class Tensor:
                 other.grad += outcome.grad
 
             elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
-                self.grad += np.matmul(np.ones_like(self.data), outcome.grad)
-                other.grad += np.matmul(np.ones_like(other.data), outcome.grad)
+                # print(self.data.shape)
+                # print(outcome.grad.shape)
+                self.grad += np.multiply(np.ones_like(self.data), outcome.grad)
+                other.grad += np.multiply(np.ones_like(other.data), outcome.grad)
 
             elif isinstance(self.data , np.ndarray) :
-                self.grad += np.matmul(np.ones_like(self.data), outcome.grad)
+                self.grad += np.multiply(np.ones_like(self.data), outcome.grad)
                 other.grad += np.sum(outcome.grad)
 
             else:
                 self.grad += np.sum(outcome.grad)
-                other.grad += np.matmul(np.ones_like(other.data), outcome.grad)
+                other.grad += np.multiply(np.ones_like(other.data), outcome.grad)
 
         outcome._backward = _backward
         return outcome
