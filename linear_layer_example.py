@@ -161,7 +161,7 @@ def second_order_solver():
         # x = np.random.random(size = (100 , 10 , 3))
         # y = np.random.random(size= (100 , 10 , 2))
 
-        x = np.random.randint(low=0, high=2000,size=(100,20,1))
+        x = np.random.randint(low=0, high=4000,size=(100,40,1))
         x.dtype = float
         y = x * 3 + 2
 

@@ -130,7 +130,8 @@ class Linear(Module):
         shape = shape[0:-1]
         shape.append(self.out_feature)
         if len(x.data.shape) != 2:
-            x = Tensor(value=np.array(flatten(data=x.data)) )
+            x = Tensor(value=x.data.reshape(-1,1)) 
+            
         
         out = ( x * self.weights  ) + self.bias 
         return out
@@ -141,7 +142,7 @@ class Linear(Module):
         shape = shape[0:-1]
         shape.append(self.out_feature)
         if len(targets.data.shape) != 2:
-            targets = Tensor(value=np.array(flatten(data=targets.data)) )
+            targets = Tensor(value=targets.data.reshape(-1,1)) 
         diff = predictions - targets
         val =  (diff.square().sum())
         return val
