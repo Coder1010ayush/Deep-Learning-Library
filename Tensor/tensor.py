@@ -107,95 +107,142 @@ class Tensor:
     def __repr__(self) -> str:
         return f"tensor({self.data},grad :{self.grad})"
     
-    
 
     def __add__(self, other):
-        # Convert other to a Tensor if it's a scalar
-        if isinstance(other, (int, float)):
-            other = Tensor(other)
 
-        # Perform the addition based on the types of self.data and other.data
-        if isinstance(self.data, np.ndarray) and isinstance(other.data, np.ndarray):
-            out_data = np.add(self.data, other.data)
-
-        elif isinstance(self.data, np.ndarray) and isinstance(other.data, (int, float)):
-            out_data = self.data + other.data
-
-        else:
-            out_data = self.data + other.data
-
-        # Create the output Tensor
-        out = Tensor(out_data, subset=(self, other), operation="Backward<Add>")
-
-        # Define the backward function
-        def _backward():
-            if isinstance(self.data, np.ndarray) and isinstance(other.data, np.ndarray):
-                self.grad += np.ones_like(self.data) * out.grad
-                other.grad += np.ones_like(other.data) * out.grad
-
-            elif isinstance(self.data, np.ndarray) and isinstance(other.data , (int , float)): 
-                self.grad += np.ones_like(self.data) * out.grad
-                other.grad += np.dot(out.grad.T, np.ones_like(out.grad))[0][0]
-                
-            else:
-                self.grad += out.grad
-                other.grad += out.grad
-
-        out._backward = _backward
-        return out
-    
-    def __mul__(self , other):
-        out = None
-        if isinstance(self.data,(int , float)) and isinstance(other.data , (int , float)):
-            out = Tensor(value=self.data*other.data,operation="Backward<Mul>",subset=(self , other))
-            def _backward():
-                self.grad = out.grad*other.data
-                other.grad = out.grad*self.data
-            return out
-
-        elif isinstance(self.data , np.ndarray) and isinstance(other.data , (int , float)): # scalar multiplication to a vector or matrix
-            out = Tensor(value=self.data*other.data,subset=(self, other),operation="Backward<Mul>")
-            def _backward():
-                self.grad = out.grad*other.data
-                other.grad = out.grad*self.data
-            out._backward = _backward
-            return out # need to review 
+        """
+            there will be three scenerion that should be handlled 
+                => 01. scalar with tensor 
+                => 02. tensor with tensor 
+                => 03 scalar with scalar
+        """
+        outcome = None
+        if isinstance(self.data , (int , float)) and isinstance(other.data , (int , float)):  #case 3
+            outcome = Tensor(value= self.data + other.data , operation="Backward<Add>", subset=(self , other))
         
-        elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
-            # print('self data shape ',self.data.shape)
-            # print('other data shape ',other.data.shape)
-            out = Tensor(value=np.matmul(self.data , other.data),subset=(self,other),operation="Backward<Matmul>")
+        elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):  # case 2
+            outcome = Tensor(value= np.add(self.data , other.data ), operation="Backward<Add>", subset=(self, other))
+
+        elif isinstance(self.data , (int , float)) and isinstance(other.data , np.ndarray): # case 1
+            outcome = Tensor(value= self.data + other.data , operation="Backward<Add>", subset=(self, other))
+
+        elif isinstance(self.data , np.ndarray)  and isinstance(other.data , (int , float)): # case 1 => extension
+            outcome = Tensor(value= self.data + other.data , operation="Backward<Add>", subset=(self,other))
 
         else:
-            raise NotImplemented()
-
+            raise ValueError("not supported data type is encountered!")
+        
+        # defining backpropogation for all above addition processes.
         def _backward():
-            vec = None
-            interediate_result1 = None
-            intermediate_result2 = None
-            vac = out.grad
-            if isinstance(vac , (int , float)):
-                vec = vac
+            if isinstance(self.data , (int , float)) and isinstance(other.data , (int , float)):
+                self.grad += outcome.grad
+                other.grad += outcome.grad
+
+            elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
+                self.grad += np.matmul(np.ones_like(self.data), outcome.grad)
+                other.grad += np.matmul(np.ones_like(other.data), outcome.grad)
+
+            elif isinstance(self.data , np.ndarray) :
+                self.grad += np.matmul(np.ones_like(self.data), outcome.grad)
+                other.grad += np.sum(outcome.grad)
+
             else:
-                vec = vac.T
-            interediate_result1 = np.dot(other.data , vec)
-            intermediate_result2 = np.dot(vec , self.data)
+                self.grad += np.sum(outcome.grad)
+                other.grad += np.matmul(np.ones_like(other.data), outcome.grad)
 
-            if isinstance(interediate_result1 , (int , float)):
-                pass
+        outcome._backward = _backward
+        return outcome
+
+
+    def __mul__(self , other):
+        """
+            this handles only element wise multiplication and for this the shape of both should be same.
+            not : there will be broadcasting also.
+            following cases :
+                => scalar to scalar
+                => scalar to matric
+                => matrix to matrix with same shape
+                => matrix to matrix with different shape => broadcasting 
+            """
+        
+        outcome = None
+        
+        if isinstance(self.data , (int , float)) and isinstance(other.data , (int , float)):
+            outcome = Tensor(value= self.data * other.data , operation="Backward<Mul>", subset=(self, other))
+
+        elif isinstance(self.data , np.ndarray) and isinstance(other.data , (int , float)):
+            outcome = Tensor(value=self.data * other.data , operation="Backward<Mul>", subset=(self, other))
+
+        elif isinstance(self.data , (int, float)) and isinstance(other.data , np.ndarray):
+            outcome = Tensor(value=other.data * self.data , operation="Backward<Mul>", subset=(self, other))
+
+        elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
+            outcome = Tensor(value= self.data * other.data , operation="Backward<Mul>", subset=(self, other))
+    
+        else:
+            raise ValueError("not supported data type is encountered!")
+        
+        # implementing backprop for all cases 
+        def _backward():
+            if isinstance(self.data , (int , float)) and isinstance(other.data , (int , float)):
+                self.grad += outcome.grad * other.data
+                other.grad += outcome.grad * self.data
+
+            elif isinstance(self.data, (int , float)) and isinstance(other.data  , np.ndarray):
+                self.grad += np.sum(outcome.grad * other.data )
+                other.grad += outcome.grad * self.data
+
+            elif isinstance(self.data , np.ndarray) and isinstance(other.data , (int , float)):
+                self.grad += outcome.grad * other.data
+                other.grad += np.sum(self.data * outcome.grad)
+
             else:
-                interediate_result1 = interediate_result1.T
+                self.grad += outcome.grad * other.data
+                other.grad += outcome.grad * self.data
 
-            if isinstance(intermediate_result2 , (int , float)):
-                pass
+        outcome._backward = _backward
+        return outcome
+    
+
+    def mat_mul(self , other):
+        """
+            here also broadcasting can be occured so defined accordingly.
+            there can be two possible cases 
+                => same dimension of two matrix 
+                    => shape may be same or not
+                => different dimension of two matrix
+                    => shape may be same or not 
+        
+        """
+
+        outcome = None
+        if isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
+            # case 1 => dimension will be same
+            if self.data.ndim == other.data.ndim :
+                outcome = Tensor(value= np.matmul(self.data, other.data ), operation="Backward<MatMul>", subset=(self, other))
+                
+            # case 2 => handling dofferent dimension of data
             else:
-                intermediate_result2 = intermediate_result2.T
+                # broadcasting will be handled by numpy internall for forward only for backprop is needed
+                outcome = Tensor(value=np.matmul(self.data , other.data ), operation="Backward<MatMul>", subset=(self, other) )
 
+        else:
+            raise ValueError("unsupported data type is encountered!")
+        
+        def _backward():
+            # case 1
+            if self.data.ndim == other.data.ndim:
+                self.grad += np.matmul(outcome.grad, other.data.T)
+                other.grad += np.matmul(self.data.T , outcome.grad)
+            
+            # case 2 
+            else:
+                shape = outcome.data.shape
+                self.grad += np.matmul(outcome.grad, other.data.T)
+                other.grad += np.matmul(self.data.T , outcome.grad)
 
-            self.grad += interediate_result1
-            other.grad += intermediate_result2
-        out._backward = _backward
-        return out
+        outcome._backward = _backward
+        return outcome
     
 
     def mean(self):

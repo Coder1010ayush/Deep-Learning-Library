@@ -245,15 +245,32 @@ def second_order_solver():
 
 
         """
-import numpy as np
-
-
-
-
-
 
 if __name__ == '__main__':
-    second_order_solver()
-    first_iteration_solver()
+    # second_order_solver()
+    # first_iteration_solver()
+
+    arr1 = torch.rand(3,3,requires_grad=True)
+    arr1.retain_grad()
+    arr2 = torch.rand(3,1 , requires_grad=True)
+    arr2.retain_grad()
+    val = arr1 * arr2
+    val.retain_grad()
+
+    out = val.mean()
+    out.retain_grad()
+    out.backward()
+
+
+    print('arr1 grad is ', arr1.grad)
+    print()
+    print('arr2 grad is ', arr2.grad)
+    print()
+    print('val grad is ', val.grad)
+    print()
+    print('out grad is ', out.grad)
+    print()
+
+
 
     
