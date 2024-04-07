@@ -240,8 +240,11 @@ class Tensor:
             # case 2 
             else:
                 shape = outcome.data.shape
+                print('self shape is ', self.data.shape)
+                print('out grad shape is ', outcome.grad.shape)
+                print('other shape is ', other.grad.shape)
                 self.grad += np.matmul(outcome.grad, other.data.T)
-                other.grad += np.matmul(self.data.T , outcome.grad)
+                other.grad += np.sum(np.multiply(self.data , outcome.grad) )
 
         outcome._backward = _backward
         return outcome

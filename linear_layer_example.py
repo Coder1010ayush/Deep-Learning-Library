@@ -247,7 +247,7 @@ def second_order_solver():
         """
 
 if __name__ == '__main__':
-    # second_order_solver()
+    second_order_solver()
     first_iteration_solver()
 
     # arr1 = torch.rand(3,3,requires_grad=True)

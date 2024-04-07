@@ -125,24 +125,42 @@ class Linear(Module):
 
 
     # forward pass method 
+    # def __call__(self , x):
+    #     shape = list(x.data.shape)
+    #     shape = shape[0:-1]
+    #     shape.append(self.out_feature)
+    #     if len(x.data.shape) != 2:
+    #         x = Tensor(value=x.data.reshape(-1,1)) 
+            
+        
+    #     out = ( x.mat_mul(self.weights)  ) + self.bias 
+    #     return out
+
     def __call__(self , x):
-        shape = list(x.data.shape)
-        shape = shape[0:-1]
-        shape.append(self.out_feature)
-        if len(x.data.shape) != 2:
-            x = Tensor(value=x.data.reshape(-1,1)) 
+        # shape = list(x.data.shape)
+        # shape = shape[0:-1]
+        # shape.append(self.out_feature)
+        # if len(x.data.shape) != 2:
+        #     x = Tensor(value=x.data.reshape(-1,1)) 
             
         
         out = ( x.mat_mul(self.weights)  ) + self.bias 
         return out
     
+    
+    
+    # def mse_loss(self, predictions, targets):
+    #     # Mean Squared Error Loss
+    #     shape = list(targets.data.shape)
+    #     shape = shape[0:-1]
+    #     shape.append(self.out_feature)
+    #     if len(targets.data.shape) != 2:
+    #         targets = Tensor(value=targets.data.reshape(-1,1)) 
+    #     diff = predictions - targets
+    #     val =  (diff.square().sum())
+    #     return val
+
     def mse_loss(self, predictions, targets):
-        # Mean Squared Error Loss
-        shape = list(targets.data.shape)
-        shape = shape[0:-1]
-        shape.append(self.out_feature)
-        if len(targets.data.shape) != 2:
-            targets = Tensor(value=targets.data.reshape(-1,1)) 
         diff = predictions - targets
         val =  (diff.square().sum())
         return val
