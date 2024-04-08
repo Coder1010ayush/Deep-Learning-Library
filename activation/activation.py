@@ -305,3 +305,65 @@ def elu(self,alpha=0.001):  # implementing backpropogation for elu activation fu
 
 """
 
+class MeanSquareError:
+     
+    """
+        this class implements the forward and backpropogation for the mean square loss function 
+        this is mainly used for regression problems.
+    """
+
+    def __call__(self,prediction, other):
+        """
+            calculating loss using mse formulae :
+            Mathematical formulae =>
+                f(x) =summation ( (other - self)**2 )
+
+            Internally it will handle all the backpropogation things using the computational graph.
+        """
+        diff = prediction - other
+        val = diff.square().sum()
+        return val
+       
+
+class Softmax:
+     
+     """
+        this class implements the forward and backward propogation of the softmax function.
+        this loss function is generally used for the squasshing the elements of a matrix between zero and one like as propability.
+     """
+
+     def __call__(self, prediction):
+          """
+            calculating the probabilities for given prediction
+            mathematical formulation =>
+                f(x) = e{xi} / sum(e{xj})  
+          """
+          den = prediction.exp().sum()
+          val = prediction/ den
+          return val
+     
+class BinaryCrossEntropy:
+     
+     """
+        this class implements the forward and backpropogation for the binary cross entropy for classification propblems.
+     """
+
+     def __call__(self, predictions, targets) :
+          """
+            calcultating the loss for prediction 
+          """
+          epsilon = Tensor(value=1e-15 ) # to avoid taking the log of 0
+          out = ((targets * (predictions + epsilon).log()  ) + (Tensor(value=1) - targets) * ((Tensor(value=1) - targets) + epsilon).log() ).mean()
+          return out
+     
+
+
+class CategoraicalCrossEntropy:
+     
+     """
+        this class implements the forward and backward pass for the categorical cross entropy for the multi class classification problems.
+     """
+     def __call__(self, prediction , targets):
+          epsilon = Tensor(value=1e-15 ) # to avoid taking the log of 0
+          out = -(targets * (prediction + epsilon).log().mean(axis = 1) )
+          return out

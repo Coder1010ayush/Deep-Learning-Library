@@ -18,7 +18,8 @@ from nn.linear_nn import Linear
 from sklearn.datasets import make_regression
 from sklearn.model_selection import train_test_split
 import numpy as np
-
+from activation.activation import MeanSquareError
+mse = MeanSquareError()
 def first_iteration_solver():
     # preparing the data set for the layer
     x = np.random.randint(low=0, high=2000,size=(2000,1))
@@ -58,13 +59,13 @@ def first_iteration_solver():
         prediction  = layer(x=x_train)
         # if epoch == 0:
         #     print(prediction)
-        loss = layer.mse_loss(predictions=prediction, targets=y_train)
+        loss = mse(prediction, y_train)
         list_result.append(loss.data)
         layer.backward(loss=loss)
         layer.update_parameters(learning_rate=learning_rate,epoch=epochs)
     #d  Check for early stopping
         if loss.data < layer.best_loss:
-            best_loss = loss.data
+            layer.best_loss = loss.data
             wait = 0
         else:
             wait += 1
@@ -163,7 +164,7 @@ def second_order_solver():
 
         x = np.random.randint(low=0, high=4000,size=(100,40,1))
         x.dtype = float
-        y = x * 3 + 2
+        y = np.random.random(size= (100,40,4))
 
         # print(x.shape)
         # print(y.shape)
@@ -183,7 +184,9 @@ def second_order_solver():
 
 
         # building a layer
-        layer = Linear(in_feature=1, out_feature=1)
+        layer = Linear(in_feature=1, out_feature=4)
+        for params in layer.parameters():
+            print(params.shape())
         layer1 = torch.nn.Linear(in_features=1, out_features=1)
         # output = layer1(torch.tensor(data=x_train,dtype=layer1.weight.dtype))
         # print(output)
@@ -200,13 +203,13 @@ def second_order_solver():
             print(prediction.data.shape)
             # if epoch == 0:
             #     print(prediction)
-            loss = layer.mse_loss(predictions=prediction, targets=y_train)
+            loss = mse(predictions=prediction, targets=y_train)
             list_result.append(loss.data)
             layer.backward(loss=loss)
             layer.update_parameters(learning_rate=learning_rate,epoch=epochs)
         #d  Check for early stopping
             if loss.data < layer.best_loss:
-                best_loss = loss.data
+                layer.best_loss = loss.data
                 wait = 0
             else:
                 wait += 1
@@ -247,7 +250,7 @@ def second_order_solver():
         """
 
 if __name__ == '__main__':
-    second_order_solver()
+    #second_order_solver()
     first_iteration_solver()
 
     # arr1 = torch.rand(3,3,requires_grad=True)

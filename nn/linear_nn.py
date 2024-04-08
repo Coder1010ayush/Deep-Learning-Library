@@ -109,7 +109,7 @@ class Linear(Module):
         self.learning_rate = learning_rate
         self.decay_rate = decay_rate
         self.best_loss = np.inf
-        self.patience = 3  # Number of epochs to wait before early stopping
+        self.patience = 30  # Number of epochs to wait before early stopping
         self.wait = 0
 
 
@@ -148,23 +148,7 @@ class Linear(Module):
         return out
     
     
-    
-    # def mse_loss(self, predictions, targets):
-    #     # Mean Squared Error Loss
-    #     shape = list(targets.data.shape)
-    #     shape = shape[0:-1]
-    #     shape.append(self.out_feature)
-    #     if len(targets.data.shape) != 2:
-    #         targets = Tensor(value=targets.data.reshape(-1,1)) 
-    #     diff = predictions - targets
-    #     val =  (diff.square().sum())
-    #     return val
-
-    def mse_loss(self, predictions, targets):
-        diff = predictions - targets
-        val =  (diff.square().sum())
-        return val
-    
+   
     def backward(self, loss):
         # Backward pass to compute gradients
         loss.backward()
@@ -253,11 +237,6 @@ class Sequential:
             x = layer(x)
         return x
 
-    def mse_loss(self, predictions, targets):
-        # Mean Squared Error Loss
-        diff = predictions - targets
-        val =  (diff.square().sum())
-        return val
     
     def backward(self, loss):
         # Backward pass to compute gradients
