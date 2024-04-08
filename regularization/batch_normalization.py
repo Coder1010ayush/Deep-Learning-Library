@@ -38,8 +38,8 @@ class BatchNormalization:
             batch_mean = np.mean(x.data, axis=0)
             batch_var = np.var(x.data, axis=0)
             
-            self.running_mean = self.momentum * self.running_mean + (1 - self.momentum) * batch_mean
-            self.running_var = self.momentum * self.running_var + (1 - self.momentum) * batch_var
+            self.current_mean = self.momentum * self.current_mean + (1 - self.momentum) * batch_mean
+            self.current_var = self.momentum * self.current_var + (1 - self.momentum) * batch_var
             
             # Normalize input
             self.x_normalized = (x.data - batch_mean) / np.sqrt(batch_var + self.epsilon)
@@ -48,7 +48,7 @@ class BatchNormalization:
             out = Tensor(value=self.gamma * self.x_normalized + self.beta,operation="Backward<BN>", subset=(x,) )
             
         elif mode == 'test':
-            self.x_normalized = (x.data - self.running_mean) / np.sqrt(self.running_var + self.epsilon)
+            self.x_normalized = (x.data - self.current_mean) / np.sqrt(self.current_var + self.epsilon)
             
             # Scale and shift normalized input
             out = Tensor(value=self.gamma * self.x_normalized + self.beta )
@@ -63,9 +63,9 @@ class BatchNormalization:
             
             # Compute gradient of input
             dx_normalized = out.data * self.gamma
-            dvar = np.sum(dx_normalized * (self.x_normalized * -0.5) / np.sqrt(self.running_var + self.epsilon), axis=0)
-            dmean = np.sum(dx_normalized * -1 / np.sqrt(self.running_var + self.epsilon), axis=0) + dvar * np.mean(-2 * (self.x_normalized - self.running_mean), axis=0)
-            dx = dx_normalized / np.sqrt(self.running_var + self.epsilon) + dvar * 2 * (self.x_normalized - self.running_mean) / self.batch_size + dmean / self.batch_size
+            dvar = np.sum(dx_normalized * (self.x_normalized * -0.5) / np.sqrt(self.current_var + self.epsilon), axis=0)
+            dmean = np.sum(dx_normalized * -1 / np.sqrt(self.current_var + self.epsilon), axis=0) + dvar * np.mean(-2 * (self.x_normalized - self.current_mean), axis=0)
+            dx = dx_normalized / np.sqrt(self.current_var + self.epsilon) + dvar * 2 * (self.x_normalized - self.current_mean) / self.batch_size + dmean / self.batch_size
             out =out - Tensor(value=learning_rate*dx )
             self.gamma -= learning_rate*dgamma
             self.beta -= learning_rate *dbeta
