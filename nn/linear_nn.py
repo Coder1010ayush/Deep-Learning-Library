@@ -87,8 +87,6 @@ class Node(Module):
     def info(self):
         info_dict = {}
         info_dict["n_in"] = self.n_in
-        info_dict["weights"] = self.weight
-        info_dict["bias"] = self.bias
         info_dict["activation_func"] = self.act
         return info_dict
     
@@ -103,7 +101,7 @@ class Linear(Module):
         self.out_feature = out_feature
         # here intitialization of weights will be done on the basis of xavier rules
         hei = Xavier(n_in=self.in_feature , n_out=self.out_feature,uniform=False)
-        self.weights = hei.initialize(shape=(self.in_feature, self.out_feature))
+        self.weights = hei.initialize(shape=(self.out_feature, self.in_feature))
         # bias is choosen randomly anything using numpy random function 
         self.bias = Tensor(value=0.0)
         self.learning_rate = learning_rate
@@ -144,7 +142,7 @@ class Linear(Module):
         #     x = Tensor(value=x.data.reshape(-1,1)) 
             
         
-        out = ( x.mat_mul(self.weights)  ) + self.bias 
+        out = ( x.mat_mul(self.weights.transpose())  ) + self.bias 
         return out
     
     
@@ -179,8 +177,6 @@ class Linear(Module):
         info_dict = {
             "in_feature": self.in_feature,
             "out_feature": self.out_feature,
-            "weights": self.weights,
-            "bias": self.bias,
             "learning_rate": self.learning_rate,
             "decay_rate": self.decay_rate
         }
@@ -250,3 +246,10 @@ class Sequential:
     def zero_grad(self):
         for layer in self.layers:
             layer.zero_grad()
+
+    def info(self):
+        info_dict = []
+        for layer in self.layers:
+            ifo = layer.info()
+            info_dict.append(ifo)
+        return info_dict

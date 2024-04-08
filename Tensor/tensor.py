@@ -73,10 +73,10 @@ class Tensor:
 
     """
 
-        How to approach it :
-            01. scalar value will be supported
-            02. list or list of list will be considered as valid input and internally handled using numpy
-            03. numpy array will also be considered
+        A general implementation of tensor class similar as pytorch. 
+        01. scalar value will be supported
+        02. list or list of list will be considered as valid input and internally handled using numpy
+        03. numpy array will also be considered
     
     """
 
@@ -254,6 +254,22 @@ class Tensor:
         outcome._backward = _backward
         return outcome
     
+    def transpose(self ):  # transposs of a matrix
+        outcome = None
+        if isinstance(self.data , np.ndarray):
+            outcome = Tensor(value= self.data.T, operation="Backward<Transposed>", subset=(self,))
+
+        else:
+            raise ValueError("unsupported data type is encountered!")
+        
+        def _backward():
+            # print('shape of data is ', self.data.shape)
+            # print('grad shape is ', outcome.grad.shape)
+            self.grad += outcome.grad.T
+        outcome._backward = _backward
+        #print(self.grad)
+        return outcome
+    
     def matrix_power(self , other):
         pass
     
@@ -267,7 +283,7 @@ class Tensor:
     #         self.grad += out.grad / self.data.size
     #     out._backward = _backward
     #     return out
-    
+
     def mean(self, axis=None):
         out = None
         if isinstance(self.data, np.ndarray):

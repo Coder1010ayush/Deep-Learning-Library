@@ -44,6 +44,11 @@ def first_iteration_solver():
 
     # building a layer
     layer = Linear(in_feature=1, out_feature=1)
+    for p in layer.parameters():
+        try:
+            print(p.data.shape)
+        except Exception as e:
+            print(p)
     layer1 = torch.nn.Linear(in_features=1, out_features=1)
     # output = layer1(torch.tensor(data=x_train,dtype=layer1.weight.dtype))
     # print(output)
@@ -85,7 +90,7 @@ def first_iteration_solver():
     x_test = Tensor(value=x_test)
     y_test = Tensor(value=y_test)
     out = layer(x=x_test)
-    loss = layer.mse_loss(out , y_test)
+    loss = mse(out , y_test)
     print('validation loss is ', loss)
 
     # random_x = Tensor(value=np.array([[3.0]]))
@@ -186,7 +191,10 @@ def second_order_solver():
         # building a layer
         layer = Linear(in_feature=1, out_feature=4)
         for params in layer.parameters():
-            print(params.shape())
+            try:
+                print(params.shape())
+            except Exception as e:
+                print(params)
         layer1 = torch.nn.Linear(in_features=1, out_features=1)
         # output = layer1(torch.tensor(data=x_train,dtype=layer1.weight.dtype))
         # print(output)
@@ -203,19 +211,19 @@ def second_order_solver():
             print(prediction.data.shape)
             # if epoch == 0:
             #     print(prediction)
-            loss = mse(predictions=prediction, targets=y_train)
+            loss = mse(prediction,y_train)
             list_result.append(loss.data)
             layer.backward(loss=loss)
             layer.update_parameters(learning_rate=learning_rate,epoch=epochs)
         #d  Check for early stopping
-            if loss.data < layer.best_loss:
-                layer.best_loss = loss.data
-                wait = 0
-            else:
-                wait += 1
-                if wait >= layer.patience:
-                    print(f"Early stopping at epoch {epoch}")
-                    break
+            # if loss.data < layer.best_loss:
+            #     layer.best_loss = loss.data
+            #     wait = 0
+            # else:
+            #     wait += 1
+            #     if wait >= layer.patience:
+            #         print(f"Early stopping at epoch {epoch}")
+            #         break
 
             if epoch % 1 == 0:
                 print(f'Epoch {epoch}, Loss: {loss.data}')
@@ -229,14 +237,14 @@ def second_order_solver():
         x_test = Tensor(value=x_test)
         y_test = Tensor(value=y_test)
         out = layer(x=x_test)
-        loss = layer.mse_loss(out , y_test)
+        loss = mse(out , y_test)
         print('validation loss is ', loss)
 
         random_x = Tensor(value=np.array([[3.0]]))
         out = layer(x=random_x)
         print()
         print("out is ", out)
-        loss = layer.mse_loss(predictions=out, targets=Tensor(value=np.array([[17.0]])))
+        loss = mse(out, Tensor(value=np.array([[17.0]])))
         print("loss is ", loss)
 
         """"
@@ -250,8 +258,8 @@ def second_order_solver():
         """
 
 if __name__ == '__main__':
-    #second_order_solver()
-    first_iteration_solver()
+    second_order_solver()
+    #first_iteration_solver()
 
     # arr1 = torch.rand(3,3,requires_grad=True)
     # arr1.retain_grad()
