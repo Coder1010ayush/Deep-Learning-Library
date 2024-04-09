@@ -1,11 +1,5 @@
-import os
-import sys
-import pathlib
 import numpy as np
-from Tensor.tensor import visualize_graph as vz, Tensor, toNumpy, toTensor
-from nn.linear_nn import Node, Linear, Sequential
-from activation.activation import relu, tanh, selu, gelu, leaky_relu, sigmoid
-from regularization.batchnormalization_2d import BatchNorm1d
+from Tensor.tensor import Tensor
 
 # model = Sequential(list_of_layers=[(1,5),(5,7),(7,1)])
 
