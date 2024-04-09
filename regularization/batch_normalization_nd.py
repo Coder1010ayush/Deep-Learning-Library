@@ -12,14 +12,15 @@ from Tensor.tensor import Tensor,visualize_graph,toNumpy,toTensor
 
 class BatchNormalization:
 
-    def __init__(self) -> None:
+    def __init__(self,momentum = 0.9) -> None:
         self.batch_size = None
         self.current_mean = None
         self.current_var = None
         self.gamma = None
         self.beta = None
-        self.epsilon = None
+        self.epsilon = 1e-5
         self.x_normalised = None
+        self.momentum = momentum
 
 
     def initializer(self , input_shape):
@@ -37,7 +38,6 @@ class BatchNormalization:
             self.batch_size = x.data.shape[0]
             batch_mean = np.mean(x.data, axis=0)
             batch_var = np.var(x.data, axis=0)
-            
             self.current_mean = self.momentum * self.current_mean + (1 - self.momentum) * batch_mean
             self.current_var = self.momentum * self.current_var + (1 - self.momentum) * batch_var
             
@@ -73,3 +73,18 @@ class BatchNormalization:
         out._backward = _backward
         
         return out
+
+
+import os
+import sys
+import pathlib
+from Tensor.tensor import Tensor, visualize_graph as vz
+from Tensor.tensor import toNumpy , toTensor
+from activation.activation import tanh, sigmoid, relu, leaky_relu
+class BatchNormalization:
+
+    """
+        this class implements the forward and backward propogation for batch normalization.
+    """
+    def __init__(self) -> None:
+        pass

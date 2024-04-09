@@ -146,15 +146,36 @@ class Tensor:
             elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
                 # print(self.data.shape)
                 # print(outcome.grad.shape)
-                self.grad += np.multiply(np.ones_like(self.data), outcome.grad)
-                other.grad += np.multiply(np.ones_like(other.data), outcome.grad)
+                obj1 = np.multiply(np.ones_like(self.data), outcome.grad)
+                obj2 = np.multiply(np.ones_like(other.data), outcome.grad)
+                # self.grad += np.multiply(np.ones_like(self.data), outcome.grad)
+                # other.grad += np.multiply(np.ones_like(other.data), outcome.grad)
 
+                # handling broadcasting 
+                """
+                    there will be two cases occured 
+                     => 01. multiply output may be not broadcastable with the grad value for self
+                     => 02. multiply output may be not broadcastable with the grad value for other
+
+                """
+                if self.grad.shape == obj1.shape:
+                    self.grad += obj1
+                else:
+                    self.grad += np.mean(obj1, axis=0)
+
+                if other.grad.shape == obj2.shape:
+                    other.grad += obj2
+                else:
+                    other.grad += np.mean(obj2 , axis=0)
+            
+
+                
             elif isinstance(self.data , np.ndarray) :
                 self.grad += np.multiply(np.ones_like(self.data), outcome.grad)
-                other.grad += np.sum(outcome.grad)
+                other.grad += np.mean(outcome.grad)
 
             else:
-                self.grad += np.sum(outcome.grad)
+                self.grad += np.mean(outcome.grad)
                 other.grad += np.multiply(np.ones_like(other.data), outcome.grad)
 
         outcome._backward = _backward
@@ -196,16 +217,31 @@ class Tensor:
                 other.grad += outcome.grad * self.data
 
             elif isinstance(self.data, (int , float)) and isinstance(other.data  , np.ndarray):
-                self.grad += np.sum(outcome.grad * other.data )
+                self.grad += np.mean(outcome.grad * other.data )
                 other.grad += outcome.grad * self.data
 
             elif isinstance(self.data , np.ndarray) and isinstance(other.data , (int , float)):
                 self.grad += outcome.grad * other.data
-                other.grad += np.sum(self.data * outcome.grad)
+                other.grad += np.mean(self.data * outcome.grad)
 
             else:
-                self.grad += outcome.grad * other.data
-                other.grad += outcome.grad * self.data
+                # self.grad += outcome.grad * other.data
+                # other.grad += outcome.grad * self.data
+
+                # handling broadcasting due to either self or either due to other
+                obj1 = outcome.grad * other.data
+                obj2 = outcome.grad * self.data
+
+                if self.grad.shape == obj1.shape:
+                    self.grad += obj1
+                else:
+                    self.grad += np.mean(obj1, axis=0)
+
+                if other.grad.shape == obj2.shape:
+                    other.grad += obj2
+                else:
+                    other.grad += np.mean(obj2 , axis=0)
+
 
         outcome._backward = _backward
         return outcome
@@ -249,7 +285,7 @@ class Tensor:
                 # print('out grad shape is ', outcome.grad.shape)
                 # print('other shape is ', other.grad.shape)
                 self.grad += np.matmul(outcome.grad, other.data.T)
-                other.grad += np.sum(np.multiply(self.data , outcome.grad) )
+                other.grad += np.mean(np.multiply(self.data , outcome.grad) )
 
         outcome._backward = _backward
         return outcome
@@ -500,16 +536,29 @@ class Tensor:
                 other.grad += outcome.grad * (-self.data / (other.data * other.data))
             
             elif isinstance(self.data , (int , float)) and isinstance(other.data , np.ndarray):
-                self.grad += np.sum( np.multiply( np.multiply(other.data, 1/(self.data * self.data) ) , outcome.grad) )
+                self.grad += np.mean( np.multiply( np.multiply(other.data, 1/(self.data * self.data) ) , outcome.grad) )
                 other.grad += np.multiply(np.multiply(1/self.data , np.ones_like(other.data)) , outcome.grad)
 
             elif isinstance(self.data , np.ndarray) and isinstance(other.data , (int , float)):
-                other.grad += np.sum( np.multiply(  np.multiply(self.data, 1/(self.data * self.data) )  , outcome.grad) )
+                other.grad += np.mean( np.multiply(  np.multiply(self.data, 1/(self.data * self.data) )  , outcome.grad) )
                 self.grad +=np.multiply( np.multiply(1/other.data , np.ones_like(self.data)), outcome.grad )
 
             else:
-                self.grad += np.multiply( np.divide(1  , other.data) , outcome.grad )
-                other.grad += np.multiply( np.multiply( self.data , np.divide(-1 , np.square(other.data))  ) , outcome.grad )
+                # self.grad += np.multiply( np.divide(1  , other.data) , outcome.grad )
+                # other.grad += np.multiply( np.multiply( self.data , np.divide(-1 , np.square(other.data))  ) , outcome.grad )
+                # handling broadcasting also 
+                obj1 = np.multiply( np.divide(1  , other.data) , outcome.grad )
+                obj2 =  np.multiply( np.multiply( self.data , np.divide(-1 , np.square(other.data))  ) , outcome.grad )
+
+                if self.grad.shape == obj1.shape:
+                    self.grad += obj1
+                else:
+                    self.grad += np.mean(obj1, axis=0)
+
+                if other.grad.shape == obj2.shape:
+                    other.grad += obj2
+                else:
+                    other.grad += np.mean(obj2 , axis=0)
 
         outcome._backward = _backward
         return outcome
