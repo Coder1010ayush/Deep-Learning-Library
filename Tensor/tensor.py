@@ -3,64 +3,63 @@
     this is very similar to pytorch class (inspiration) supported by autograd mechanism.
 
 """
-
-import os
 from graphviz import Digraph
 import numpy as np
-import sys
-import pathlib 
 import math
-#from initializer.xavier import Hei , Xavier ,LeCun
+
+
+# from initializer.xavier import Hei , Xavier ,LeCun
 
 def visualize_graph(self, filename='computation_graph'):
-        dot = Digraph()
-        
-        visited = set()
+    dot = Digraph()
 
-        # Define a recursive function to traverse the graph and add nodes and edges
-        def add_node(tensor):
-            if tensor not in visited:
-                visited.add(tensor)
-                if tensor.operation == '':
-                    sign = "leaf node"
-                else:
-                    sign = {tensor.operation}
-                dot.node(str(tensor.id), f'{tensor.data}\ngradient: {tensor.grad}\nOperation: {sign}')
-                for child in tensor.attached_node:
-                    dot.edge(str(tensor.id), str(child.id))
-                    add_node(child)
-        
-        add_node(self)
+    visited = set()
 
-        dot.render(filename, format='png', cleanup=True)
+    # Define a recursive function to traverse the graph and add nodes and edges
+    def add_node(tensor):
+        if tensor not in visited:
+            visited.add(tensor)
+            if tensor.operation == '':
+                sign = "leaf node"
+            else:
+                sign = {tensor.operation}
+            dot.node(str(tensor.id), f'{tensor.data}\ngradient: {tensor.grad}\nOperation: {sign}')
+            for child in tensor.attached_node:
+                dot.edge(str(tensor.id), str(child.id))
+                add_node(child)
 
-def toTensor(x:list):
+    add_node(self)
+
+    dot.render(filename, format='png', cleanup=True)
+
+
+def toTensor(x: list):
     outcome = []
     # iterating over the list and if a list than recursive calling happen otherwise element will be transformed to Tensor
     for it in x:
-        if isinstance(it , list):
-            outcome.append(toTensor(it))   # recursive calling in case of list 
+        if isinstance(it, list):
+            outcome.append(toTensor(it))  # recursive calling in case of list
         else:
             outcome.append(Tensor(value=it))  # transformation to tensor
 
     return outcome
 
 
-def toNumpy(x:list):
+def toNumpy(x: list):
     outcome = []
-    # iterating over the list and if a list than recursive calling happen otherwise element will be restored from tesnor to a python data tpye
+    # iterating over the list and if a list than recursive calling happen otherwise element will be restored from tenor to a python data type
     for it in x:
-        if isinstance(it , list):
+        if isinstance(it, list):
             outcome.append(toNumpy(x=it))
         else:
-            outcome.append(it.data) # restoration from tensor data to normal python data type
+            outcome.append(it.data)  # restoration from tensor data to normal python data type
     if len(outcome) == 1:
-        return outcome[0]    
+        return outcome[0]
     return outcome
 
 
-def dimension_reducer(val:list):
-    # traverse until list is nested and 0 item is not get as an primitive data type
+def dimension_reducer(val: list):
+    # traverse until list is nested and 0 item is not get as a primitive data type
     if not isinstance(val, list):
         return ()
     if len(val) == 0:
@@ -70,45 +69,43 @@ def dimension_reducer(val:list):
 
 
 class Tensor:
-
     """
 
-        A general implementation of tensor class similar as pytorch. 
+        A general implementation of tensor class similar as pytorch.
         01. scalar value will be supported
         02. list or list of list will be considered as valid input and internally handled using numpy
         03. numpy array will also be considered
-    
+
     """
 
-    def __init__(self,value , operation ='', subset = ()) -> None:
+    def __init__(self, value, operation='', subset=()) -> None:
         self.data = None
         self.grad = None
         self.operation = operation
         self.attached_node = set(subset)
-        self._backward = lambda : None
+        self._backward = lambda: None
         self.id = id(self)
 
-        if isinstance(value , (int , float)):
+        if isinstance(value, (int, float)):
 
             self.data = value
             self.grad = 0
 
-        elif isinstance(value , list):
-            
-            self.data = np.array(object= value,dtype=float)
+        elif isinstance(value, list):
+
+            self.data = np.array(object=value, dtype=float)
             self.grad = np.zeros_like(a=self.data)
 
-        elif isinstance(value , np.ndarray):
+        elif isinstance(value, np.ndarray):
 
             self.data = value
-            self.grad = np.zeros_like(a=self.data,dtype=float)
+            self.grad = np.zeros_like(a=self.data, dtype=float)
 
-    
     def __repr__(self) -> str:
         return f"tensor({self.data},grad :{self.grad})"
-    
+
     def shape(self):
-        if isinstance(self.data , (int , float)):
+        if isinstance(self.data, (int, float)):
             return f'Size()'
         else:
             return f'Size{self.data.shape}'
@@ -116,34 +113,34 @@ class Tensor:
     def __add__(self, other):
 
         """
-            there will be three scenerion that should be handlled 
-                => 01. scalar with tensor 
-                => 02. tensor with tensor 
+            there will be three scenario that should be handled
+                => 01. scalar with tensor
+                => 02. tensor with tensor
                 => 03 scalar with scalar
         """
         outcome = None
-        if isinstance(self.data , (int , float)) and isinstance(other.data , (int , float)):  #case 3
-            outcome = Tensor(value= self.data + other.data , operation="Backward<Add>", subset=(self , other))
-        
-        elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):  # case 2
-            outcome = Tensor(value= np.add(self.data , other.data ), operation="Backward<Add>", subset=(self, other))
+        if isinstance(self.data, (int, float)) and isinstance(other.data, (int, float)):  # case 3
+            outcome = Tensor(value=self.data + other.data, operation="Backward<Add>", subset=(self, other))
 
-        elif isinstance(self.data , (int , float)) and isinstance(other.data , np.ndarray): # case 1
-            outcome = Tensor(value= self.data + other.data , operation="Backward<Add>", subset=(self, other))
+        elif isinstance(self.data, np.ndarray) and isinstance(other.data, np.ndarray):  # case 2
+            outcome = Tensor(value=np.add(self.data, other.data), operation="Backward<Add>", subset=(self, other))
 
-        elif isinstance(self.data , np.ndarray)  and isinstance(other.data , (int , float)): # case 1 => extension
-            outcome = Tensor(value= self.data + other.data , operation="Backward<Add>", subset=(self,other))
+        elif isinstance(self.data, (int, float)) and isinstance(other.data, np.ndarray):  # case 1
+            outcome = Tensor(value=self.data + other.data, operation="Backward<Add>", subset=(self, other))
+
+        elif isinstance(self.data, np.ndarray) and isinstance(other.data, (int, float)):  # case 1 => extension
+            outcome = Tensor(value=self.data + other.data, operation="Backward<Add>", subset=(self, other))
 
         else:
             raise ValueError("not supported data type is encountered!")
-        
-        # defining backpropogation for all above addition processes.
+
+        # defining backpropagation for all above addition processes.
         def _backward():
-            if isinstance(self.data , (int , float)) and isinstance(other.data , (int , float)):
+            if isinstance(self.data, (int, float)) and isinstance(other.data, (int, float)):
                 self.grad += outcome.grad
                 other.grad += outcome.grad
 
-            elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
+            elif isinstance(self.data, np.ndarray) and isinstance(other.data, np.ndarray):
                 # print(self.data.shape)
                 # print(outcome.grad.shape)
                 obj1 = np.multiply(np.ones_like(self.data), outcome.grad)
@@ -151,10 +148,10 @@ class Tensor:
                 # self.grad += np.multiply(np.ones_like(self.data), outcome.grad)
                 # other.grad += np.multiply(np.ones_like(other.data), outcome.grad)
 
-                # handling broadcasting 
+                # handling broadcasting
                 """
                     there will be two cases occured 
-                     => 01. multiply output may be not broadcastable with the grad value for self
+                     => 01. multiply output may be not broadcast with the grad value for self
                      => 02. multiply output may be not broadcastable with the grad value for other
 
                 """
@@ -166,11 +163,11 @@ class Tensor:
                 if other.grad.shape == obj2.shape:
                     other.grad += obj2
                 else:
-                    other.grad += np.mean(obj2 , axis=0)
-            
+                    other.grad += np.mean(obj2, axis=0)
 
-                
-            elif isinstance(self.data , np.ndarray) :
+
+
+            elif isinstance(self.data, np.ndarray):
                 self.grad += np.multiply(np.ones_like(self.data), outcome.grad)
                 other.grad += np.mean(outcome.grad)
 
@@ -181,46 +178,45 @@ class Tensor:
         outcome._backward = _backward
         return outcome
 
-
-    def __mul__(self , other):
+    def __mul__(self, other):
         """
             this handles only element wise multiplication and for this the shape of both should be same.
             not : there will be broadcasting also.
             following cases :
                 => scalar to scalar
-                => scalar to matric
+                => scalar to matrix
                 => matrix to matrix with same shape
-                => matrix to matrix with different shape => broadcasting 
+                => matrix to matrix with different shape => broadcasting
             """
-        
+
         outcome = None
-        
-        if isinstance(self.data , (int , float)) and isinstance(other.data , (int , float)):
-            outcome = Tensor(value= self.data * other.data , operation="Backward<Mul>", subset=(self, other))
 
-        elif isinstance(self.data , np.ndarray) and isinstance(other.data , (int , float)):
-            outcome = Tensor(value=self.data * other.data , operation="Backward<Mul>", subset=(self, other))
+        if isinstance(self.data, (int, float)) and isinstance(other.data, (int, float)):
+            outcome = Tensor(value=self.data * other.data, operation="Backward<Mul>", subset=(self, other))
 
-        elif isinstance(self.data , (int, float)) and isinstance(other.data , np.ndarray):
-            outcome = Tensor(value=other.data * self.data , operation="Backward<Mul>", subset=(self, other))
+        elif isinstance(self.data, np.ndarray) and isinstance(other.data, (int, float)):
+            outcome = Tensor(value=self.data * other.data, operation="Backward<Mul>", subset=(self, other))
 
-        elif isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
-            outcome = Tensor(value= self.data * other.data , operation="Backward<Mul>", subset=(self, other))
-    
+        elif isinstance(self.data, (int, float)) and isinstance(other.data, np.ndarray):
+            outcome = Tensor(value=other.data * self.data, operation="Backward<Mul>", subset=(self, other))
+
+        elif isinstance(self.data, np.ndarray) and isinstance(other.data, np.ndarray):
+            outcome = Tensor(value=self.data * other.data, operation="Backward<Mul>", subset=(self, other))
+
         else:
             raise ValueError("not supported data type is encountered!")
-        
-        # implementing backprop for all cases 
+
+        # implementing backprop for all cases
         def _backward():
-            if isinstance(self.data , (int , float)) and isinstance(other.data , (int , float)):
+            if isinstance(self.data, (int, float)) and isinstance(other.data, (int, float)):
                 self.grad += outcome.grad * other.data
                 other.grad += outcome.grad * self.data
 
-            elif isinstance(self.data, (int , float)) and isinstance(other.data  , np.ndarray):
-                self.grad += np.mean(outcome.grad * other.data )
+            elif isinstance(self.data, (int, float)) and isinstance(other.data, np.ndarray):
+                self.grad += np.mean(outcome.grad * other.data)
                 other.grad += outcome.grad * self.data
 
-            elif isinstance(self.data , np.ndarray) and isinstance(other.data , (int , float)):
+            elif isinstance(self.data, np.ndarray) and isinstance(other.data, (int, float)):
                 self.grad += outcome.grad * other.data
                 other.grad += np.mean(self.data * outcome.grad)
 
@@ -240,75 +236,75 @@ class Tensor:
                 if other.grad.shape == obj2.shape:
                     other.grad += obj2
                 else:
-                    other.grad += np.mean(obj2 , axis=0)
-
+                    other.grad += np.mean(obj2, axis=0)
 
         outcome._backward = _backward
         return outcome
-    
 
-    def mat_mul(self , other):
+    def mat_mul(self, other):
         """
             here also broadcasting can be occured so defined accordingly.
-            there can be two possible cases 
-                => same dimension of two matrix 
+            there can be two possible cases
+                => same dimension of two matrix
                     => shape may be same or not
                 => different dimension of two matrix
-                    => shape may be same or not 
-        
+                    => shape may be same or not
+
         """
 
         outcome = None
-        if isinstance(self.data , np.ndarray) and isinstance(other.data , np.ndarray):
+        if isinstance(self.data, np.ndarray) and isinstance(other.data, np.ndarray):
             # case 1 => dimension will be same
-            if self.data.ndim == other.data.ndim :
-                outcome = Tensor(value= np.matmul(self.data, other.data ), operation="Backward<MatMul>", subset=(self, other))
-                
-            # case 2 => handling dofferent dimension of data
+            if self.data.ndim == other.data.ndim:
+                outcome = Tensor(value=np.matmul(self.data, other.data), operation="Backward<MatMul>",
+                                 subset=(self, other))
+
+            # case 2 => handling different dimension of data
             else:
-                # broadcasting will be handled by numpy internall for forward only for backprop is needed
-                outcome = Tensor(value=np.matmul(self.data , other.data ), operation="Backward<MatMul>", subset=(self, other) )
+                # broadcasting will be handled by numpy internal for forward only for backprop is needed
+                outcome = Tensor(value=np.matmul(self.data, other.data), operation="Backward<MatMul>",
+                                 subset=(self, other))
 
         else:
             raise ValueError("unsupported data type is encountered!")
-        
+
         def _backward():
             # case 1
             if self.data.ndim == other.data.ndim:
                 self.grad += np.matmul(outcome.grad, other.data.T)
-                other.grad += np.matmul(self.data.T , outcome.grad)
-            
-            # case 2 
+                other.grad += np.matmul(self.data.T, outcome.grad)
+
+            # case 2
             else:
-                shape = outcome.data.shape
+                # shape = outcome.data.shape
                 # print('self shape is ', self.data.shape)
                 # print('out grad shape is ', outcome.grad.shape)
                 # print('other shape is ', other.grad.shape)
                 self.grad += np.matmul(outcome.grad, other.data.T)
-                other.grad += np.mean(np.multiply(self.data , outcome.grad) )
+                other.grad += np.mean(np.multiply(self.data, outcome.grad))
 
         outcome._backward = _backward
         return outcome
-    
-    def transpose(self ):  # transposs of a matrix
+
+    def transpose(self):  # transpose of a matrix
         outcome = None
-        if isinstance(self.data , np.ndarray):
-            outcome = Tensor(value= self.data.T, operation="Backward<Transposed>", subset=(self,))
+        if isinstance(self.data, np.ndarray):
+            outcome = Tensor(value=self.data.T, operation="Backward<Transposed>", subset=(self,))
 
         else:
             raise ValueError("unsupported data type is encountered!")
-        
+
         def _backward():
             # print('shape of data is ', self.data.shape)
             # print('grad shape is ', outcome.grad.shape)
             self.grad += outcome.grad.T
+
         outcome._backward = _backward
-        #print(self.grad)
+        # print(self.grad)
         return outcome
-    
-    def matrix_power(self , other):
+
+    def matrix_power(self, other):
         pass
-    
 
     # def mean(self):
     #     out = None
@@ -325,6 +321,7 @@ class Tensor:
         if isinstance(self.data, np.ndarray):
             out_data = np.mean(self.data, axis=axis)
             out = Tensor(value=out_data, subset=(self,), operation="Backward<Mean>")
+
             def _backward():
                 if axis is None:
                     self.grad += out.grad / self.data.size
@@ -335,136 +332,159 @@ class Tensor:
                     for ax in axis:
                         axis_shape[ax] = 1
                     self.grad += np.broadcast_to(out.grad.reshape(axis_shape), self.data.shape)
+
             out._backward = _backward
         return out
 
-    
     def max(self):
-        # calculate outcome and setting up backrpop chaining
+        # calculate outcome and setting up backpropagation chaining
         outcome = None
-        if isinstance(self.data , np.ndarray):
-            outcome = Tensor(value=np.max(self.data),subset=(self,),operation="Backward<Max>")
+        if isinstance(self.data, np.ndarray):
+            outcome = Tensor(value=np.max(self.data), subset=(self,), operation="Backward<Max>")
+
             def _backward():
-                self.grad += (self.data==outcome.data) * outcome.grad
+                self.grad += (self.data == outcome.data) * outcome.grad
+
             outcome._backward = _backward
-    
-        
+
+
         else:
             raise ValueError("unsupported data type is given!")
         return outcome
-    
+
     def min(self):
-        # calculate outcome and setting up the backpropogation chaining through child nodes
+        # calculate outcome and setting up the backpropagation chaining through child nodes
         outcome = None
-        if isinstance(self.data , np.ndarray):
-            outcome = Tensor(value=np.min(self.data),subset=(self,),operation="Backward<Min>")
+        if isinstance(self.data, np.ndarray):
+            outcome = Tensor(value=np.min(self.data), subset=(self,), operation="Backward<Min>")
+
             def _backward():
-                self.grad += (self.data==outcome.data) * outcome.grad
+                self.grad += (self.data == outcome.data) * outcome.grad
+
             outcome._backward = _backward
-    
+
         else:
             raise ValueError("unsupported data type is given!")
         return outcome
-            
+
     def log(self):
-        # calculate the outcome after taking log with respect to 10 and than setting up backprop chaining with other node 
+        # calculate the outcome after taking log with respect to 10 and then setting up backprop chaining with other node
         outcome = None
-        if isinstance(self.data , (int ,float)):
-            outcome = Tensor(value=math.log(self.data) , subset=(self,),operation="Backward<Log>")
+        if isinstance(self.data, (int, float)):
+            outcome = Tensor(value=math.log(self.data), subset=(self,), operation="Backward<Log>")
+
             def _backward():
-                self.grad += outcome.grad * 1/self.data
+                self.grad += outcome.grad * 1 / self.data
+
             outcome._backward = _backward
-            
-        elif isinstance(self.data , np.ndarray):
-            outcome = Tensor(value=np.log(self.data), subset=(self,),operation="Backward<Log>")
+
+        elif isinstance(self.data, np.ndarray):
+            outcome = Tensor(value=np.log(self.data), subset=(self,), operation="Backward<Log>")
+
             def _backward():
 
-                self.grad += 1/self.data * outcome.grad
+                self.grad += 1 / self.data * outcome.grad
+
             outcome._backward = _backward
 
         return outcome
-    
+
     def exp(self):
-        # calculating the oucome after doing the exponentiation and than setting up the chain for backpropogation with its child nodes
+        # calculating the outcome after doing the exponentiation and then setting up the chain for backpropagation with its child nodes
         outcome = None
-        if isinstance(self.data ,(int , float)):
+        if isinstance(self.data, (int, float)):
 
-            outcome = Tensor(value=math.exp(self.data),subset=(self,),operation="Backward<Exp>")
+            outcome = Tensor(value=math.exp(self.data), subset=(self,), operation="Backward<Exp>")
+
             def _backward():
                 self.grad += outcome.data * outcome.grad
+
             outcome._backward = _backward
-        
-        elif isinstance(self.data ,np.ndarray):
-            outcome = Tensor(value=np.exp(self.data),operation="Backward<Exp>",subset=(self,))
+
+        elif isinstance(self.data, np.ndarray):
+            outcome = Tensor(value=np.exp(self.data), operation="Backward<Exp>", subset=(self,))
+
             def _backward():
 
                 self.grad += outcome.data * outcome.grad
+
             outcome._backward = _backward
-        
+
         return outcome
-    
-    def sum(self,axis:int=None):
+
+    def sum(self, axis: int = None):
         outcome = None
-        if isinstance(self.data , np.ndarray):
-            outcome = Tensor(value=np.sum(self.data , axis=axis),subset=(self,),operation="BackWard<Sum>")
+        if isinstance(self.data, np.ndarray):
+            outcome = Tensor(value=np.sum(self.data, axis=axis), subset=(self,), operation="BackWard<Sum>")
+
             def _backward():
                 if axis:
                     axis_mask = np.expand_dims(np.ones(self.data.shape[axis]), axis=axis)
                     # Distribute gradients to the elements that contributed to the sum
                     self.grad += (axis_mask * outcome.grad)
                 else:
-                    self.grad +=  outcome.grad * np.ones_like(self.data)
+                    self.grad += outcome.grad * np.ones_like(self.data)
+
             outcome._backward = _backward
 
         else:
             raise ValueError("not supported data type")
-        
+
         return outcome
-    
+
     def square(self):
         # implementing the square function for tensor class objects with forward and backward pass also for trashing the computational graph
         outcome = None
-        if isinstance(self.data , (int , float)):
-            outcome = Tensor(value=self.data * self.data,operation="Backward<Square>",subset=(self,))
-            def _backward():
-                self.grad += 2*self.data * outcome.grad
-            outcome._backward  = _backward
+        if isinstance(self.data, (int, float)):
+            outcome = Tensor(value=self.data * self.data, operation="Backward<Square>", subset=(self,))
 
-        elif isinstance(self.data , np.ndarray):
-            outcome = Tensor(value=np.square(self.data),subset=(self,),operation="Backward<Square>")
             def _backward():
-                self.grad += 2*self.data * outcome.grad
+                self.grad += 2 * self.data * outcome.grad
+
             outcome._backward = _backward
-    
+
+        elif isinstance(self.data, np.ndarray):
+            outcome = Tensor(value=np.square(self.data), subset=(self,), operation="Backward<Square>")
+
+            def _backward():
+                self.grad += 2 * self.data * outcome.grad
+
+            outcome._backward = _backward
+
         else:
             raise ValueError("unsupported data type is encountered!")
         return outcome
-    
+
     def sqrt(self):
         outcome = None
-        if isinstance(self.data , np.ndarray):
-            outcome = Tensor(value=np.sqrt(self.data),subset=(self,),operation="Backward<Sqrt>")
+        if isinstance(self.data, np.ndarray):
+            outcome = Tensor(value=np.sqrt(self.data), subset=(self,), operation="Backward<Sqrt>")
+
             def _backward():
-                self.grad += (1/(2*outcome.data)) * outcome.grad
-            outcome._backward = _backward
-        
-        elif isinstance(self.data , (int ,float)):
-            outcome = Tensor(value=np.sqrt(self.data),subset=(self,),operation="Backward<Sqrt>")
-            def _backward():
-                self.grad += 1/(2*outcome.data) * outcome.grad
+                self.grad += (1 / (2 * outcome.data)) * outcome.grad
+
             outcome._backward = _backward
 
-        
+        elif isinstance(self.data, (int, float)):
+            outcome = Tensor(value=np.sqrt(self.data), subset=(self,), operation="Backward<Sqrt>")
+
+            def _backward():
+                self.grad += 1 / (2 * outcome.data) * outcome.grad
+
+            outcome._backward = _backward
+
+
         else:
             raise ValueError("unsupported data type is encountered!")
-        
+
         return outcome
-    
-    def variance(self,axis):
+
+    def variance(self, axis):
         # implementing the variance forward and backward pass
         outcome = None
-        if isinstance(self.data , np.ndarray):
-            outcome = Tensor(value= np.var(self.data , axis=axis))
+        if isinstance(self.data, np.ndarray):
+            outcome = Tensor(value=np.var(self.data, axis=axis))
+
             # backward pass
 
             def _backward():
@@ -474,81 +494,85 @@ class Tensor:
                 else:
                     axis_mask = np.expand_dims(np.ones(self.data.shape[axis]), axis=axis)
                     self.grad += (axis_mask * outcome.grad / self.data.shape[axis])
+
             outcome._backward = _backward
 
         else:
             raise ValueError("unsupported data type is encountered!")
-        
+
         return outcome
 
-    def std(self,axis:int = None):  # may need to review it testing is compulsory 
+    def std(self, axis: int = None):  # may need to review it testing is compulsory
         outcome = None
-        if isinstance(self.data , np.ndarray):
+        if isinstance(self.data, np.ndarray):
             out = self.variance(axis=axis)
             outcome = out.sqrt()
             outcome.operation = "Backward<std>"
             outcome.subset = (self,)
+
             def _backward():
                 # Propagate gradients through the square root operation
                 out._backward()
                 # Propagate gradients through the variance operation (via chain rule)
                 self.grad += out.grad / (2 * outcome.data)
+
             outcome._backward = _backward
 
         else:
-            raise ValueError("unsupported data type is encourted!")
+            raise ValueError("unsupported data type is encouraged!")
         return outcome
-    
+
     """
         this is an element wise division so shape must be shape
-    
+
     """
+
     def __truediv__(self, other):
         """
-            forward and backpropogation for the division of two scalar tensor as well as element wise 
-            division of to same shape of tensor and also a scalar Tensor and a matric tensor.
+            forward and backpropagation for the division of two scalar tensor as well as element wise
+            division of to same shape of tensor and also a scalar Tensor and a matrix tensor.
             Case :
                 => scalar to scale
                 => scalar to tensor vice - versa true
                 => tensor to tensor
-        
+
         """
         outcome = None
-        if isinstance(self.data ,(int, float)) and isinstance(other.data , (int , float)): # case 1 
-            outcome = Tensor(value= self.data / other.data , operation="Backward<Div>", subset=(self , other))
+        if isinstance(self.data, (int, float)) and isinstance(other.data, (int, float)):  # case 1
+            outcome = Tensor(value=self.data / other.data, operation="Backward<Div>", subset=(self, other))
 
-        elif isinstance(self.data , (int , float)) and isinstance(other.data , np.ndarray): # case 2
-            outcome = Tensor(value= self.data /other.data , operation="Backward<Div>", subset=(self , other))
+        elif isinstance(self.data, (int, float)) and isinstance(other.data, np.ndarray):  # case 2
+            outcome = Tensor(value=self.data / other.data, operation="Backward<Div>", subset=(self, other))
 
-        elif isinstance(self.data, np.ndarray) and isinstance(other.data , (int , float)):
-            outcome = Tensor(value= self.data / other.data , operation="Backward<Div>", subset=(self , other))
+        elif isinstance(self.data, np.ndarray) and isinstance(other.data, (int, float)):
+            outcome = Tensor(value=self.data / other.data, operation="Backward<Div>", subset=(self, other))
 
-        elif isinstance(self.data,np.ndarray ) and isinstance(other.data , np.ndarray):
-            outcome = Tensor(value= np.divide(self.data , other.data ) , operation="Backward<Div>", subset=(self , other))
+        elif isinstance(self.data, np.ndarray) and isinstance(other.data, np.ndarray):
+            outcome = Tensor(value=np.divide(self.data, other.data), operation="Backward<Div>", subset=(self, other))
 
         else:
             raise ValueError("unsupported data type is encountered!")
-        
+
         # setting up backprop
         def _backward():
-            if isinstance(self.data , (int , float)) and isinstance(other.data , (int , float)):
-                self.grad += 1/other.data * outcome.grad
+            if isinstance(self.data, (int, float)) and isinstance(other.data, (int, float)):
+                self.grad += 1 / other.data * outcome.grad
                 other.grad += outcome.grad * (-self.data / (other.data * other.data))
-            
-            elif isinstance(self.data , (int , float)) and isinstance(other.data , np.ndarray):
-                self.grad += np.mean( np.multiply( np.multiply(other.data, 1/(self.data * self.data) ) , outcome.grad) )
-                other.grad += np.multiply(np.multiply(1/self.data , np.ones_like(other.data)) , outcome.grad)
 
-            elif isinstance(self.data , np.ndarray) and isinstance(other.data , (int , float)):
-                other.grad += np.mean( np.multiply(  np.multiply(self.data, 1/(self.data * self.data) )  , outcome.grad) )
-                self.grad +=np.multiply( np.multiply(1/other.data , np.ones_like(self.data)), outcome.grad )
+            elif isinstance(self.data, (int, float)) and isinstance(other.data, np.ndarray):
+                self.grad += np.mean(np.multiply(np.multiply(other.data, 1 / (self.data * self.data)), outcome.grad))
+                other.grad += np.multiply(np.multiply(1 / self.data, np.ones_like(other.data)), outcome.grad)
+
+            elif isinstance(self.data, np.ndarray) and isinstance(other.data, (int, float)):
+                other.grad += np.mean(np.multiply(np.multiply(self.data, 1 / (self.data * self.data)), outcome.grad))
+                self.grad += np.multiply(np.multiply(1 / other.data, np.ones_like(self.data)), outcome.grad)
 
             else:
                 # self.grad += np.multiply( np.divide(1  , other.data) , outcome.grad )
                 # other.grad += np.multiply( np.multiply( self.data , np.divide(-1 , np.square(other.data))  ) , outcome.grad )
-                # handling broadcasting also 
-                obj1 = np.multiply( np.divide(1  , other.data) , outcome.grad )
-                obj2 =  np.multiply( np.multiply( self.data , np.divide(-1 , np.square(other.data))  ) , outcome.grad )
+                # handling broadcasting also
+                obj1 = np.multiply(np.divide(1, other.data), outcome.grad)
+                obj2 = np.multiply(np.multiply(self.data, np.divide(-1, np.square(other.data))), outcome.grad)
 
                 if self.grad.shape == obj1.shape:
                     self.grad += obj1
@@ -558,81 +582,80 @@ class Tensor:
                 if other.grad.shape == obj2.shape:
                     other.grad += obj2
                 else:
-                    other.grad += np.mean(obj2 , axis=0)
+                    other.grad += np.mean(obj2, axis=0)
 
         outcome._backward = _backward
         return outcome
 
-    
-    def __pow__(self , other):
+    def __pow__(self, other):
         """
-             implementing the power function for tensor and establish the chaining process of backpropoogation 
+             implementing the power function for tensor and establish the chaining process of backpropagation
              for scalar tensor as well as matrix tensor als0.
              mathematical formulation is :
-                f(x) = x(n)  () => this represents the power 
-             derivative of this funciton is :
+                f(x) = x(n)  () => this represents the power
+             derivative of this function is :
                 f'(x) = n*x(n-1)
         """
-        if isinstance(other , (int , float)):
-            other = Tensor(value= other)
+        if isinstance(other, (int, float)):
+            other = Tensor(value=other)
 
         outcome = None
-        # setting up backpropogation for the self 
+
+        # setting up backpropagation for the self
         def _backward():
             self.grad += other.data * (self.data ** (other.data - 1)) * outcome.grad
 
+        if isinstance(self.data, (int, float)):
+            if isinstance(other.data, (int, float)):
+                outcome = Tensor(value=self.data ** other.data, operation="Backward<pow>", subset=(self,))
 
-        if isinstance(self.data , (int , float)):
-            if isinstance(other.data , (int , float)):
-                outcome = Tensor(value=self.data ** other.data , operation="Backward<pow>", subset=(self, ))
-
-            else: 
-                raise NotImplemented()
-            outcome._backward = _backward
-            
-        elif isinstance(self.data , np.ndarray):
-            """
-                this supports only element wise power not matrix to matrix multiplication
-                this is for fast and effieciency.
-            """
-            if isinstance(other.data , (int , float)):
-                outcome = Tensor(value= self.data ** other.data , operation="Backward<pow>" , subset=(self,))
             else:
                 raise NotImplemented()
-            outcome._backward  = _backward
+            outcome._backward = _backward
+
+        elif isinstance(self.data, np.ndarray):
+            """
+                this supports only element wise power not matrix to matrix multiplication
+                this is for fast and efficiency.
+            """
+            if isinstance(other.data, (int, float)):
+                outcome = Tensor(value=self.data ** other.data, operation="Backward<pow>", subset=(self,))
+            else:
+                raise NotImplemented()
+            outcome._backward = _backward
 
         else:
             raise ValueError("unsupported data type is encountered!")
         return outcome
 
-
-
-    def __radd__(self , other):
+    def __radd__(self, other):
         return self + other
-    
+
     def __neg__(self):
         return self * Tensor(value=-1)
-    
+
     def __sub__(self, other):
         return self + (-other)
-    
-    def __rsub__(self , other):
+
+    def __rsub__(self, other):
         return other + (-self)
 
-    def __rtruediv__(self, other): 
+    def __rtruediv__(self, other):
         return self / other
 
     def backward(self):  # this function is the base function which generate computational graph for each node or tensor
         graph_nodes = []
         visited = set()
+
         def build_graph(v):
             if v not in visited:
                 visited.add(v)
                 for child in v.attached_node:
                     build_graph(child)
                 graph_nodes.append(v)
+
         build_graph(self)
-        if isinstance(self.data, (int , float)):
+        if isinstance(self.data, (int, float)):
             self.grad = 1
         else:
             self.grad = np.ones_like(self.data)
@@ -641,40 +664,38 @@ class Tensor:
             v._backward()
 
 
-#note 
+# note
 """
     All the activation function is implemented in activation/activation.py instead of here
 
 """
 if __name__ == '__main__':
-
     print('let us start!')
-    # taking an example and verified using pytorch autograd 
+    # taking an example and verified using pytorch autograd
     arr1 = [
-        [1.2 , 1.3, 1.4],
+        [1.2, 1.3, 1.4],
         [2.3, 4.5, 5.6],
         [12.3, 14.5, 15.6]
     ]
 
     arr2 = [
-        [7.2 , 1.3, 1.4,5.6],
-        [2.3, 13.4, 5.6,7.9],
-        [8.1, 6.1, 5.5,8.1]
+        [7.2, 1.3, 1.4, 5.6],
+        [2.3, 13.4, 5.6, 7.9],
+        [8.1, 6.1, 5.5, 8.1]
     ]
 
     arr3 = [
-        [1.2 , 1.3, 13.4,2.3],
-        [7.3, 2.5, 5.6,6.7],
-        [4.1, 5.1, 12.5,5.6],
-        [11.2,23.2,1.3,2.4]
+        [1.2, 1.3, 13.4, 2.3],
+        [7.3, 2.5, 5.6, 6.7],
+        [4.1, 5.1, 12.5, 5.6],
+        [11.2, 23.2, 1.3, 2.4]
     ]
 
     arr4 = [
-        [1.7 , 1.13, 7.4,4.5],
-        [2.5, 4.8, 9.6,5.5],
-        [3.0, 4.8, 8.5,6.5]
+        [1.7, 1.13, 7.4, 4.5],
+        [2.5, 4.8, 9.6, 5.5],
+        [3.0, 4.8, 8.5, 6.5]
     ]
-
 
     # obj1 = Tensor(value=arr1)
     # obj2 = Tensor(value=arr2)
@@ -688,9 +709,9 @@ if __name__ == '__main__':
     # loss = out.mean()
     # loss.backward()
     # visualize_graph(self=loss,filename = 'img/custom_autograd')
-    # print('renadered!')
+    # print('rendered!')
 
-    maxi = Tensor(value=np.random.random(size=(10 , 10)))
-    mini = Tensor(value=np.random.random(size= (10 , 10)))
+    maxi = Tensor(value=np.random.random(size=(10, 10)))
+    mini = Tensor(value=np.random.random(size=(10, 10)))
     val = maxi / mini
     print(val)
