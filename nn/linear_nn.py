@@ -84,7 +84,7 @@ class Node(Module):
     # wrapper function => automatically called whenever the instance of the node will be tried out to be printed
     def __repr__(self) -> str:
         return f"Node{self.n_in}"
-
+                        
     def info(self):
         info_dict = dict()
         info_dict["n_in"] = self.n_in
